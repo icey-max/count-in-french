@@ -1,77 +1,47 @@
 # French Numbers Mastery
 
-French Numbers Mastery is a free browser app for learning French numbers from 1 to 100. It helps learners practice the sound, spelling, and structure of French numbers with short lessons, audio prompts, recall drills, adaptive review, and a final exam.
+Learn French numbers from 1 to 100 with short lessons, audio practice, recall drills, and review.
 
-Live app: https://icey-max.github.io/french-numbers-mastery/
+Open the app: https://icey-max.github.io/french-numbers-mastery/
 
-## What You Practice
+## What This Helps You Learn
 
-- French numbers from 1 to 100.
-- Listening comprehension with audio prompts.
-- Spelling from digits into French.
-- Fast recall from French back to numbers.
-- The difficult 70s, 80s, and 90s patterns.
-- Mixed review before a final mastery check.
+French Numbers Mastery is for beginners who want French numbers to feel automatic. It trains you to recognize numbers by sight, write them in French, understand them when you hear them, and remember the patterns behind the difficult ranges.
 
-French counting has a few patterns that feel unusual to English speakers. The app gives extra attention to forms such as `soixante-dix`, `quatre-vingts`, and `quatre-vingt-dix` so learners can understand the logic instead of memorizing each number as an isolated word.
+You will practice:
 
-## How It Works
+- Counting in French from 1 to 100.
+- Hearing a French number and typing the digits.
+- Seeing digits and writing the French spelling.
+- Remembering numbers you missed before.
+- Understanding the 70s, 80s, and 90s patterns.
 
-The course is split into ten levels. Each level introduces a small range of numbers, then asks the learner to recall them in different directions: seeing digits, writing French, hearing audio, and typing the number. Review sessions recycle missed and low-streak numbers so practice time goes toward what still needs work.
+## Why French Numbers Need Practice
 
-Progress is stored locally in the browser. There is no account system and no backend service.
+Some French numbers are straightforward, like `un`, `deux`, `trois`, and `dix`. Others use patterns that can surprise English speakers.
 
-## Run Locally
+For example:
 
-Requirements:
+- 70 is `soixante-dix`, or sixty-ten.
+- 80 is `quatre-vingts`, or four twenties.
+- 90 is `quatre-vingt-dix`, or four-twenty-ten.
 
-- Node.js 22 or newer.
-- A modern browser.
+The app gives these patterns extra practice so you learn how the numbers work instead of memorizing a long list one word at a time.
 
-Start the local server:
+## How To Use It
 
-```bash
-npm run dev
-```
+Start at Level 1 and move through the numbers in small groups. Each level introduces a range, then asks you to answer from memory. You will see digits, hear audio, type French spellings, and review mistakes until the numbers become easier to recall.
 
-Run the test suite:
+After you finish the levels, use mixed review and the final exam to check whether you can handle the full 1-100 range without relying on the order of a lesson.
 
-```bash
-npm test
-```
+## What Makes It Useful
 
-Build the static site:
+- Small lessons keep practice manageable.
+- Audio prompts train listening, not just reading.
+- Active recall makes you type answers instead of only recognizing them.
+- Adaptive review brings missed numbers back into practice.
+- The final exam checks the full range from 1 to 100.
 
-```bash
-npm run build
-```
+## Privacy
 
-The build command writes a static production artifact that can be deployed directly to GitHub Pages.
-
-## Branch Workflow
-
-This repository uses two long-lived branches:
-
-- `dev` is the default development branch.
-- `live` is the production branch used by GitHub Pages.
-
-Typical release flow:
-
-```bash
-git switch dev
-npm test
-npm run build
-git switch live
-git merge dev
-git push origin live
-```
-
-Pushing to `live` runs the GitHub Pages workflow. The workflow tests the app, builds the static site, uploads the artifact, and deploys it to Pages.
-
-## Project Status
-
-The current version focuses on numbers 1-100, browser-based progress, audio practice, and static hosting. Future improvements could include more pronunciation guidance, additional review modes, and broader French beginner drills.
-
-## License
-
-No license has been selected yet. Add one before inviting outside contributions.
+The app runs in your browser. Your progress is saved locally on your device, and you do not need an account to use it.
