@@ -20,6 +20,7 @@
 
 body {
   min-height: 100vh;
+  min-height: 100dvh;
   margin: 0;
   color: var(--ink);
   font-family: var(--body);
@@ -1162,18 +1163,41 @@ input:focus {
 
   .hero-card {
     min-height: calc(100vh - 0.75rem);
+    min-height: calc(100dvh - 0.75rem);
+    padding: clamp(0.85rem, 3.5vw, 1.25rem);
     border-radius: 1.35rem;
   }
 
-  .app-header,
   .dashboard-grid,
   .learn-layout {
     display: block;
   }
 
+  .app-header {
+    gap: 0.85rem;
+    margin-bottom: 1rem;
+  }
+
+  .brand {
+    min-width: 0;
+  }
+
+  .brand-mark {
+    width: 2.65rem;
+    height: 2.65rem;
+    border-radius: 0.85rem;
+    box-shadow: 0.25rem 0.25rem 0 var(--ink);
+  }
+
+  .brand strong,
+  .brand small {
+    overflow-wrap: anywhere;
+  }
+
   .status-pill {
-    width: fit-content;
-    margin-top: 1rem;
+    flex: none;
+    padding: 0.55rem 0.75rem;
+    font-size: 0.9rem;
   }
 
   .review-panel,
@@ -1194,30 +1218,103 @@ input:focus {
     width: 100%;
   }
 
+  .primary-action,
+  .mode-card,
+  .level-card,
+  .mission-card,
+  .mission-phase,
+  .pattern-example,
+  .card-audio,
+  .audio-prompt,
+  .footer-action {
+    touch-action: manipulation;
+  }
+
   /* Quiz: stack card over answer, footer sticks to bottom */
+  .hero-card.route-quiz,
+  .hero-card.route-exam {
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding: 0.75rem;
+    border: 0;
+    border-radius: 0;
+    background: rgba(255, 250, 240, 0.9);
+    box-shadow: none;
+  }
+
+  .hero-card.route-quiz .app-header,
+  .hero-card.route-exam .app-header {
+    display: none;
+  }
+
   .quiz-layout {
-    min-height: calc(100vh - 7rem);
-    padding-bottom: 6rem;
+    min-height: calc(100vh - 1.5rem);
+    min-height: calc(100dvh - 1.5rem);
+    grid-template-rows: auto auto minmax(0, 1fr);
+    gap: 0.75rem;
+    padding-bottom: calc(6.25rem + env(safe-area-inset-bottom));
+  }
+
+  .quiz-topbar {
+    gap: 0.65rem;
+  }
+
+  .quiz-quit {
+    width: 2.35rem;
+    height: 2.35rem;
+    border-radius: 0.75rem;
+  }
+
+  .session-progress {
+    height: 0.8rem;
   }
 
   .quiz-board {
     grid-template-columns: 1fr;
-    grid-template-rows: auto auto;
+    grid-template-rows: minmax(10rem, auto) auto;
+    align-content: start;
+    gap: 0.85rem;
   }
 
   .quiz-card {
     grid-column: 1;
     grid-row: 1;
-    min-height: 14rem;
+    min-height: clamp(10rem, 32dvh, 15rem);
+    padding: clamp(1rem, 4.5vw, 1.5rem);
+    border-left-width: 4px;
+    border-radius: 1.15rem;
   }
 
   .answer-zone {
     grid-column: 1;
     grid-row: 2;
+    justify-content: flex-start;
+    gap: 0.5rem;
   }
 
   .written-prompt {
-    font-size: clamp(3.5rem, 18vw, 6rem);
+    max-width: 100%;
+    font-size: 4.4rem;
+    line-height: 0.92;
+    overflow-wrap: anywhere;
+    word-break: normal;
+  }
+
+  .audio-wave {
+    height: 3.4rem;
+  }
+
+  .audio-wave i:nth-child(1) { height: 1.2rem; }
+  .audio-wave i:nth-child(2) { height: 2.3rem; }
+  .audio-wave i:nth-child(3) { height: 3.2rem; }
+  .audio-wave i:nth-child(4) { height: 2rem; }
+  .audio-wave i:nth-child(5) { height: 1.1rem; }
+
+  input {
+    min-height: 3.4rem;
+    padding: 0.95rem 1rem;
+    border-radius: 0.9rem;
+    font-size: 1.15rem;
   }
 
   .quiz-footer {
@@ -1228,6 +1325,8 @@ input:focus {
     grid-column: auto;
     grid-row: auto;
     z-index: 5;
+    min-height: calc(5.25rem + env(safe-area-inset-bottom));
+    padding: 0.8rem 0.9rem calc(0.8rem + env(safe-area-inset-bottom));
     border-radius: 1.2rem 1.2rem 0 0;
     border-bottom: 0;
     background: var(--paper);
@@ -1235,7 +1334,222 @@ input:focus {
   }
 
   .footer-action {
-    flex: none;
+    min-height: 3.2rem;
+    flex: 0 0 min(13rem, 48vw);
+    padding: 0.85rem 1rem;
+  }
+}
+
+@media (max-width: 560px) {
+  .app-shell {
+    width: 100%;
+    margin: 0;
+  }
+
+  .hero-card {
+    min-height: 100vh;
+    min-height: 100dvh;
+    border-radius: 0;
+  }
+
+  .app-header {
+    align-items: flex-start;
+  }
+
+  .brand {
+    gap: 0.7rem;
+  }
+
+  .brand strong {
+    line-height: 1.1;
+  }
+
+  .brand small,
+  .status-pill,
+  .quiz-count,
+  .footer-hint {
+    font-size: 0.82rem;
+  }
+
+  .status-pill {
+    max-width: 8.5rem;
+    text-align: center;
+  }
+
+  h1 {
+    font-size: 2.9rem;
+    line-height: 0.9;
+  }
+
+  h2 {
+    font-size: 1.8rem;
+  }
+
+  .intro-panel,
+  .review-panel,
+  .phase-copy,
+  .pattern-panel,
+  .results-panel,
+  .review-screen,
+  .missions-section {
+    padding: 1rem;
+    border-radius: 1.1rem;
+  }
+
+  .metric-row {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.55rem;
+    margin: 1.1rem 0;
+  }
+
+  .metric-card {
+    min-width: 0;
+    padding: 0.75rem;
+    border-radius: 0.85rem;
+  }
+
+  .metric-card strong {
+    font-size: 1.35rem;
+  }
+
+  .metric-card span {
+    font-size: 0.78rem;
+    line-height: 1.15;
+  }
+
+  .primary-action {
+    width: 100%;
+    min-width: 0;
+    border-radius: 0.95rem;
+  }
+
+  .phase-copy h1 {
+    max-width: none;
+    font-size: 2.45rem;
+  }
+
+  .phase-copy p {
+    font-size: 1rem;
+    line-height: 1.45;
+  }
+
+  .number-stage {
+    min-height: 22rem;
+    padding: 1.25rem;
+    border-radius: 1.1rem;
+  }
+
+  .giant-number {
+    font-size: 5.2rem;
+  }
+
+  .french-word {
+    font-size: 2rem;
+  }
+
+  .pronunciation {
+    margin-bottom: 1.2rem;
+    font-size: 1.15rem;
+  }
+
+  .level-ladder,
+  .pattern-examples,
+  .review-options {
+    gap: 0.7rem;
+  }
+
+  .level-card {
+    flex-basis: calc(50% - 0.35rem);
+    min-height: 7.2rem;
+    padding: 0.85rem;
+  }
+
+  .mission-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-card.route-quiz,
+  .hero-card.route-exam {
+    padding: 0.55rem;
+  }
+
+  .direction-banner {
+    gap: 0.45rem;
+    padding: 0.5rem;
+    border-radius: 0.85rem;
+  }
+
+  .dir-chip {
+    min-height: 2.1rem;
+    padding: 0.35rem 0.6rem;
+    font-size: 0.82rem;
+  }
+
+  .quiz-layout {
+    min-height: calc(100vh - 1.1rem);
+    min-height: calc(100dvh - 1.1rem);
+    padding-bottom: calc(8.2rem + env(safe-area-inset-bottom));
+  }
+
+  .quiz-board {
+    grid-template-rows: minmax(8.5rem, auto) auto;
+  }
+
+  .quiz-card {
+    min-height: clamp(8.5rem, 29dvh, 12rem);
+    gap: 0.55rem;
+  }
+
+  .card-tag,
+  .audio-hint,
+  .answer-label {
+    font-size: 0.78rem;
+  }
+
+  .card-audio {
+    min-height: 2.75rem;
+    margin-top: 0.2rem;
+    padding: 0.55rem 0.85rem;
+  }
+
+  .written-prompt {
+    font-size: 3.25rem;
+  }
+
+  .quiz-footer {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 0.65rem;
+    min-height: calc(7.3rem + env(safe-area-inset-bottom));
+  }
+
+  .footer-hint {
+    text-align: center;
+  }
+
+  .footer-action {
+    width: 100%;
+    flex-basis: auto;
+  }
+
+  .feedback {
+    align-items: flex-start;
+    min-width: 0;
+  }
+
+  .feedback-icon {
+    width: 2rem;
+    height: 2rem;
+    font-size: 1.1rem;
+  }
+
+  .feedback-body {
+    min-width: 0;
+  }
+
+  .feedback-body span {
+    overflow-wrap: anywhere;
   }
 }
 
