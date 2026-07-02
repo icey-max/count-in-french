@@ -347,8 +347,9 @@ function overallProficiency() {
 }
 
 function render() {
+  const routeClass = `route-${route.name}`;
   app.innerHTML = `
-    <section class="hero-card" aria-live="polite">
+    <section class="hero-card ${routeClass}" aria-live="polite">
       ${renderHeader()}
       ${renderRoute()}
     </section>
