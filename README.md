@@ -1,63 +1,61 @@
-# French Numbers Mastery - Learn French Numbers 1-100
+# French Numbers Mastery
 
-French Numbers Mastery is a free interactive web app for learning French numbers from 1 to 100. It combines audio pronunciation, spelling practice, listening recall, adaptive review, and a final exam so learners can move beyond memorizing a list and build fast number recognition.
+French Numbers Mastery is a free browser app for learning French numbers from 1 to 100. It helps learners practice the sound, spelling, and structure of French numbers with short lessons, audio prompts, recall drills, adaptive review, and a final exam.
 
-Live site: https://icey-max.github.io/french-numbers-mastery/
+Live app: https://icey-max.github.io/french-numbers-mastery/
 
-## Why Use It?
+## What You Practice
 
-French numbers become tricky around 70, 80, and 90. This trainer focuses on the patterns that English speakers often miss: `soixante-dix`, `quatre-vingts`, and `quatre-vingt-dix`. Learners practice numbers by seeing digits, hearing audio, typing French spellings, and reviewing missed answers until recall becomes automatic.
+- French numbers from 1 to 100.
+- Listening comprehension with audio prompts.
+- Spelling from digits into French.
+- Fast recall from French back to numbers.
+- The difficult 70s, 80s, and 90s patterns.
+- Mixed review before a final mastery check.
 
-Use it to:
+French counting has a few patterns that feel unusual to English speakers. The app gives extra attention to forms such as `soixante-dix`, `quatre-vingts`, and `quatre-vingt-dix` so learners can understand the logic instead of memorizing each number as an isolated word.
 
-- Learn French numbers 1 to 100 in ten focused levels.
-- Hear audio pronunciation for every number from 1 to 100.
-- Practice French number spelling with forgiving accent and hyphen handling.
-- Train listening recall by typing the number after hearing French audio.
-- Review weak numbers with adaptive practice.
-- Take a final exam when every level is complete.
+## How It Works
 
-## Learning Flow
+The course is split into ten levels. Each level introduces a small range of numbers, then asks the learner to recall them in different directions: seeing digits, writing French, hearing audio, and typing the number. Review sessions recycle missed and low-streak numbers so practice time goes toward what still needs work.
 
-The app starts with structured lessons, then asks learners to recall answers actively. Each level introduces ten numbers, checks the spelling and listening directions, and unlocks review modes as progress improves. The final exam mixes the full 1-100 range so learners can test real fluency rather than short-term recognition.
+Progress is stored locally in the browser. There is no account system and no backend service.
 
-Progress is saved locally in the browser. No account, backend, or tracking service is required.
-
-## Development
+## Run Locally
 
 Requirements:
 
 - Node.js 22 or newer.
-- A modern browser with JavaScript enabled.
+- A modern browser.
 
-Run locally:
+Start the local server:
 
 ```bash
 npm run dev
 ```
 
-Run tests:
+Run the test suite:
 
 ```bash
 npm test
 ```
 
-Build the static GitHub Pages artifact:
+Build the static site:
 
 ```bash
 npm run build
 ```
 
-The build command packages only the static site assets, injects the production URL into page metadata, and generates crawler files for the deployed site.
+The build command writes a static production artifact that can be deployed directly to GitHub Pages.
 
-## Branch and Deploy Workflow
+## Branch Workflow
 
 This repository uses two long-lived branches:
 
-- `dev` is the working branch for changes.
-- `live` is the production branch. Pushing to `live` deploys GitHub Pages.
+- `dev` is the default development branch.
+- `live` is the production branch used by GitHub Pages.
 
-Recommended release flow:
+Typical release flow:
 
 ```bash
 git switch dev
@@ -68,20 +66,11 @@ git merge dev
 git push origin live
 ```
 
-In GitHub, configure Pages with `GitHub Actions` as the source. The deploy workflow tests the app, builds the static artifact, uploads it to GitHub Pages, and deploys only after the build job succeeds.
+Pushing to `live` runs the GitHub Pages workflow. The workflow tests the app, builds the static site, uploads the artifact, and deploys it to Pages.
 
-## Search and AI Discovery
+## Project Status
 
-The deployed site is prepared for search indexing and AI-assisted discovery with:
-
-- A search-focused title and description for "learn French numbers" and "French numbers 1 to 100".
-- Canonical URL metadata generated from the GitHub Pages URL.
-- Open Graph and Twitter metadata for shared previews.
-- Schema.org structured data describing the app as a free educational web application and course.
-- `robots.txt`, `sitemap.xml`, and `llms.txt` generated during the production build.
-- Crawlable fallback HTML that explains the course before JavaScript runs.
-
-These files do not guarantee ranking, but they make the site easier for Google, other search engines, and AI search systems to understand and crawl.
+The current version focuses on numbers 1-100, browser-based progress, audio practice, and static hosting. Future improvements could include more pronunciation guidance, additional review modes, and broader French beginner drills.
 
 ## License
 
