@@ -97,6 +97,7 @@ let activeAnswer = null;
 let activeAudio = null;
 let activeSpeech = null;
 let lastAutoPlayKey = null;
+let lastLearnAutoPlayKey = null;
 
 // Global Enter handler: while feedback is showing, Enter advances to the next
 // challenge. The answer input is disabled during feedback, so the form's own
@@ -601,7 +602,7 @@ function renderLearn(levelId, index) {
         <div class="french-word">${card.french}</div>
         <div class="pronunciation">${card.pronunciation}</div>
         <div class="control-row">
-          <button class="secondary-action" data-action="play-audio" data-number="${card.number}" ${audioAvailable ? '' : 'disabled'}>${audioAvailable ? 'Play audio' : 'No recording'}</button>
+          <button class="secondary-action audio-action" data-action="play-audio" data-number="${card.number}" ${audioAvailable ? '' : 'disabled'}>${audioAvailable ? 'Play audio' : 'No recording'}</button>
           <button class="primary-small" data-action="next-learn" data-level="${levelId}" data-index="${index}">${isLast ? 'Start guided quiz' : 'Next'}</button>
         </div>
       </article>
@@ -881,6 +882,7 @@ function bindActions() {
 
   focusAnswerInput();
   maybeAutoPlay();
+  maybeAutoPlayLearnCard();
 }
 
 // Allowed characters per expected answer kind:
@@ -911,6 +913,11 @@ function maybeAutoPlay() {
   // Auto-play the number's audio whenever the user lands on a fresh, unanswered
   // challenge. Reaching a challenge is always preceded by a user gesture
   // (click/Enter), so browser autoplay policies allow this.
+  if (route.name !== 'quiz' && route.name !== 'exam') {
+    lastAutoPlayKey = null;
+    return;
+  }
+
   if (!activeSession || activeSession.finished || activeAnswer) {
     if (activeAnswer) lastAutoPlayKey = null;
     return;
@@ -925,6 +932,28 @@ function maybeAutoPlay() {
   lastAutoPlayKey = key;
 
   speak(question.card);
+}
+
+function maybeAutoPlayLearnCard() {
+  if (route.name !== 'learn') {
+    lastLearnAutoPlayKey = null;
+    return;
+  }
+
+  const levelId = route.levelId;
+  const index = route.index || 0;
+  const hasLesson = Boolean(PATTERN_LESSONS[levelId]);
+  if (hasLesson && index === 0) return;
+
+  const adjustedIndex = hasLesson ? index - 1 : index;
+  const card = getLevelCards(levelId)[adjustedIndex];
+  if (!card || !hasPlayableAudio(card)) return;
+
+  const key = `${levelId}-${index}-${card.number}`;
+  if (key === lastLearnAutoPlayKey) return;
+  lastLearnAutoPlayKey = key;
+
+  speak(card);
 }
 
 function focusAnswerInput() {
