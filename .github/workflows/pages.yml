@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - live
+    paths-ignore:
+      - README.md
+      - assets/readme/**
   workflow_dispatch:
 
 permissions:

@@ -4,6 +4,8 @@ Learn French numbers from 1 to 100 with short lessons, audio practice, recall dr
 
 Open the app: https://icey-max.github.io/french-numbers-mastery/
 
+![French Numbers Mastery demo: dashboard, lesson cards, and a typed answer](assets/readme/french-numbers-mastery-demo.gif)
+
 ## What This Helps You Learn
 
 French Numbers Mastery is for beginners who want French numbers to feel automatic. It trains you to recognize numbers by sight, write them in French, understand them when you hear them, and remember the patterns behind the difficult ranges.
