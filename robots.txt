@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://icey-max.github.io/french-numbers-mastery/sitemap.xml

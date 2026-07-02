@@ -1,0 +1,22 @@
+# French Numbers Mastery
+
+> Free browser-based trainer for learning French numbers from 1 to 100 with audio pronunciation, spelling practice, recall quizzes, adaptive review, and a final exam.
+
+Website: https://icey-max.github.io/french-numbers-mastery/
+
+## What it teaches
+
+- French numbers 1 to 100
+- French number spelling, including 70-79, 80-89, and 90-99 patterns
+- French number pronunciation through audio prompts
+- Fast recall from digits to French and from spoken French to numbers
+
+## Useful entry points
+
+- https://icey-max.github.io/french-numbers-mastery/ - Interactive French numbers course
+- https://icey-max.github.io/french-numbers-mastery/sitemap.xml - XML sitemap
+- https://icey-max.github.io/french-numbers-mastery/robots.txt - Crawler policy
+
+## Content notes
+
+The site is a static educational web app. It does not require an account, does not use a backend, and stores learner progress locally in the browser.
