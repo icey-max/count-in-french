@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Count in French icon">
+  <rect width="64" height="64" rx="14" fill="#fffaf0"/>
+  <rect x="0" y="0" width="21.33" height="64" rx="14" fill="#284bff"/>
+  <rect x="21.33" y="0" width="21.34" height="64" fill="#fffaf0"/>
+  <rect x="42.67" y="0" width="21.33" height="64" rx="14" fill="#f04d3a"/>
+  <rect x="6" y="7" width="52" height="50" rx="11" fill="#fffaf0" stroke="#1c1913" stroke-width="3"/>
+  <text x="32" y="39" fill="#1c1913" font-family="Georgia, serif" font-size="22" font-weight="700" text-anchor="middle">123</text>
+  <path d="M18 46h28" stroke="#284bff" stroke-width="4" stroke-linecap="round"/>
+</svg>

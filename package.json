@@ -1,5 +1,5 @@
 {
-  "name": "french-numbers-mastery",
+  "name": "count-in-french",
   "version": "1.0.0",
   "private": true,
   "type": "module",
@@ -10,6 +10,7 @@
     "build": "node scripts/build-site.js",
     "dev": "node server.js",
     "preview": "node server.js",
+    "audio:soundoftext": "node scripts/generate-soundoftext-audio.js",
     "test": "node --test"
   }
 }

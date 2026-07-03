@@ -1,10 +1,10 @@
-import { cpSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const outDir = join(root, 'dist');
-const defaultSiteUrl = 'https://icey-max.github.io/french-numbers-mastery/';
+const defaultSiteUrl = 'https://icey-max.github.io/count-in-french/';
 const siteUrl = normalizeSiteUrl(process.env.SITE_URL || defaultSiteUrl);
 const buildDate = new Date().toISOString().slice(0, 10);
 
@@ -13,6 +13,7 @@ mkdirSync(outDir, { recursive: true });
 
 copyDirectory('assets');
 copyDirectory('src');
+copyPublicFiles();
 writeText('index.html', renderTemplate(readText('index.html')));
 writeText('404.html', renderTemplate(readText('index.html')));
 writeText('.nojekyll', '');
@@ -24,6 +25,15 @@ console.log(`Built static site for ${siteUrl}`);
 
 function copyDirectory(name) {
   cpSync(join(root, name), join(outDir, name), { recursive: true });
+}
+
+function copyPublicFiles() {
+  const publicDir = join(root, 'public');
+  if (!existsSync(publicDir)) return;
+
+  for (const entry of readdirSync(publicDir)) {
+    cpSync(join(publicDir, entry), join(outDir, entry), { recursive: true });
+  }
 }
 
 function readText(path) {
@@ -68,22 +78,22 @@ function renderSitemap() {
 }
 
 function renderLlmsText() {
-  return `# French Numbers Mastery
+  return `# Count in French
 
-> Free browser-based trainer for learning French numbers from 1 to 100 with audio pronunciation, spelling practice, recall quizzes, adaptive review, and a final exam.
+> Free browser-based trainer for learning French numbers from 1 through billions with pronunciation practice, spelling practice, recall quizzes, adaptive review, and a final exam.
 
 Website: ${siteUrl}
 
 ## What it teaches
 
-- French numbers 1 to 100
-- French number spelling, including 70-79, 80-89, and 90-99 patterns
+- French numbers 1 through billions
+- French number spelling, including 70-79, 80-89, 90-99, hundreds, thousands, millions, and billions
 - French number pronunciation through audio prompts
 - Fast recall from digits to French and from spoken French to numbers
 
 ## Useful entry points
 
-- ${siteUrl} - Interactive French numbers course
+- ${siteUrl} - Interactive Count in French course
 - ${siteUrl}sitemap.xml - XML sitemap
 - ${siteUrl}robots.txt - Crawler policy
 

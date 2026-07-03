@@ -54,5 +54,5 @@ const server = createServer((request, response) => {
 });
 
 server.listen(port, () => {
-  console.log(`French Numbers Mastery available at http://localhost:${port}`);
+  console.log(`Count in French available at http://localhost:${port}`);
 });

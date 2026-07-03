@@ -347,9 +347,63 @@ h2 {
   margin-top: 0.75rem;
 }
 
+.level-groups {
+  display: grid;
+  gap: clamp(1rem, 2.5vw, 1.6rem);
+  margin-top: 1rem;
+}
+
+.level-group {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.level-group-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.2rem 0.25rem 0;
+}
+
+.level-group-heading h2 {
+  margin: 0;
+  font-family: var(--display);
+  font-size: clamp(1.25rem, 2.8vw, 1.8rem);
+  line-height: 1;
+}
+
+.level-group-heading p:last-child {
+  max-width: 32rem;
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.level-group-forming {
+  position: relative;
+  margin-top: 0.35rem;
+  padding: clamp(0.9rem, 2.4vw, 1.15rem);
+  border: 1px solid rgba(40, 75, 255, 0.2);
+  border-radius: 1.35rem;
+  background:
+    linear-gradient(135deg, rgba(40, 75, 255, 0.1), transparent 58%),
+    rgba(255, 255, 255, 0.36);
+}
+
+.level-group-forming .level-group-heading {
+  padding: 0;
+}
+
+.level-group-forming .eyebrow,
+.level-group-forming .level-group-heading h2 {
+  color: #1f3fd4;
+}
+
 .level-ladder {
   flex-wrap: wrap;
-  margin-top: 1rem;
 }
 
 .missions-section {
@@ -586,6 +640,20 @@ h2 {
 
 .level-card.is-mastered .level-status {
   color: var(--green);
+}
+
+.level-group-forming .level-card {
+  border-color: rgba(40, 75, 255, 0.22);
+  background:
+    linear-gradient(180deg, rgba(40, 75, 255, 0.05), transparent 65%),
+    rgba(255, 250, 240, 0.88);
+}
+
+.level-group-forming .level-card.is-current {
+  border-color: var(--blue);
+  background:
+    linear-gradient(180deg, rgba(40, 75, 255, 0.1), transparent 58%),
+    rgba(255, 250, 240, 0.95);
 }
 
 .level-topline {
