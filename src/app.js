@@ -7,15 +7,31 @@ import {
   validateAnswer,
 } from './numbers.js';
 
-const STORAGE_KEY = 'frenchNumbersMastery.progress.v1';
+const STORAGE_KEY = 'countInFrench.progress.v1';
+const LEGACY_STORAGE_KEY = 'frenchNumbersMastery.progress.v1';
 const MASTERY_TARGET = 3;
 const LEVEL_REVIEW_PASSING_SCORE = 90;
 const FINAL_EXAM_PASSING_SCORE = 95;
 const DIMENSION_MASTERY_SCORE = 100;
 const MISSION_PASSING_SCORE = 100;
 const AUDIO_BASE_URL = new URL('../assets/audio/', import.meta.url);
-const RECORDED_AUDIO_NUMBERS = new Set(Array.from({ length: 100 }, (_, index) => index + 1));
-const GENERATED_AUDIO_NUMBERS = new Set([0]);
+const RECORDED_AUDIO_NUMBERS = new Set([0, ...NUMBER_CARDS.map((card) => card.number)]);
+const GENERATED_AUDIO_NUMBERS = new Set();
+const TOTAL_LEVELS = LEVELS.length;
+const LEVEL_GROUPS = [
+  {
+    id: 'core',
+    title: 'Core numbers',
+    subtitle: 'Build automatic recall from 1 to 100 before combining larger chunks.',
+    levels: LEVELS.filter((level) => level.id <= 10),
+  },
+  {
+    id: 'forming',
+    title: 'Number forming',
+    subtitle: 'Assemble hundreds, thousands, millions, and milliards from reusable French parts.',
+    levels: LEVELS.filter((level) => level.id > 10),
+  },
+];
 
 const MISSION_PHASES = [
   {
@@ -90,6 +106,8 @@ const MISSIONS = [
 
 const app = document.querySelector('#app');
 
+seedLocalhostMasterProgress();
+
 let progress = loadProgress();
 let route = { name: 'dashboard' };
 let activeSession = null;
@@ -112,6 +130,45 @@ document.addEventListener('keydown', (event) => {
 });
 
 render();
+
+function seedLocalhostMasterProgress() {
+  const params = new URLSearchParams(window.location.search);
+  const isLocalhost = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+  if (!isLocalhost || params.get('master') !== '1') return;
+
+  const seeded = createInitialProgress();
+  for (const level of LEVELS) {
+    const levelState = seeded.levels[level.id];
+    levelState.learnComplete = true;
+    levelState.reviewPassed = true;
+    levelState.completed = true;
+    levelState.mastery.writing = { passed: true, bestScore: 100, lastScore: 100 };
+    levelState.mastery.hearing = { passed: true, bestScore: 100, lastScore: 100 };
+    for (const card of Object.values(levelState.cards)) {
+      card.streak = MASTERY_TARGET;
+      card.mastered = true;
+      card.attempts = MASTERY_TARGET;
+      card.misses = 0;
+    }
+  }
+
+  const clearedAt = new Date().toISOString();
+  for (const mission of MISSIONS) {
+    for (const phase of MISSION_PHASES) {
+      seeded.missions[mission.id].phases[phase.id] = {
+        bestScore: 100,
+        lastScore: 100,
+        attempts: 1,
+        clears: 1,
+        lastClearedAt: clearedAt,
+      };
+    }
+  }
+
+  seeded.finalExam = { unlocked: true, passed: true, bestScore: 100, lastScore: 100 };
+  writeStoredProgress(JSON.stringify(seeded));
+  window.history.replaceState({}, '', window.location.pathname || '/');
+}
 
 function loadProgress() {
   const saved = readStoredProgress();
@@ -260,7 +317,12 @@ function saveProgress() {
 
 function readStoredProgress() {
   try {
-    return localStorage.getItem(STORAGE_KEY);
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) return saved;
+
+    const legacy = localStorage.getItem(LEGACY_STORAGE_KEY);
+    if (legacy) writeStoredProgress(legacy);
+    return legacy;
   } catch {
     return null;
   }
@@ -277,6 +339,7 @@ function writeStoredProgress(value) {
 function removeStoredProgress() {
   try {
     localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(LEGACY_STORAGE_KEY);
   } catch {
     // Ignore storage failures so the app can still render.
   }
@@ -299,7 +362,7 @@ function allLevelsComplete() {
 }
 
 function currentLevelId() {
-  return LEVELS.find((level) => !progress.levels[level.id].completed)?.id || 10;
+  return LEVELS.find((level) => !progress.levels[level.id].completed)?.id || LEVELS.at(-1).id;
 }
 
 function masteredCount(levelId) {
@@ -338,6 +401,10 @@ function dimensionLabel(dimension) {
   return dimension === 'hearing' ? 'Hearing' : 'Writing';
 }
 
+function formatNumber(number) {
+  return new Intl.NumberFormat('en-US').format(number);
+}
+
 function overallProficiency() {
   const total = NUMBER_CARDS.length * MASTERY_TARGET;
   const achieved = NUMBER_CARDS.reduce((sum, card) => {
@@ -364,8 +431,8 @@ function renderHeader() {
       <button class="brand" data-action="dashboard" aria-label="Go to dashboard">
         <span class="brand-mark">FR</span>
         <span>
-          <strong>French Numbers Mastery</strong>
-          <small>1-100 fluency trainer</small>
+          <strong>Count in French</strong>
+          <small>1 to 1 billion+ fluency trainer</small>
         </span>
       </button>
       <div class="status-pill ${progress.finalExam.passed ? 'status-mastered' : ''}">${status}</div>
@@ -389,14 +456,14 @@ function renderDashboard() {
       <div class="intro-panel">
         <p class="eyebrow">Teach. Recall. Recycle. Master.</p>
         <h1>Build instant French number fluency.</h1>
-        <p class="lede">Move through ten focused levels, hear every number, write from memory, then optionally master each completed level in Writing and Hearing at 100%.</p>
+        <p class="lede">Move through focused levels, hear available audio, write from memory, then optionally master each completed level in Writing and Hearing at 100%.</p>
         <div class="metric-row">
           <div class="metric-card">
             <strong>${current}</strong>
             <span>Current level</span>
           </div>
           <div class="metric-card">
-            <strong>${completed}/10</strong>
+            <strong>${completed}/${TOTAL_LEVELS}</strong>
             <span>Levels complete</span>
           </div>
           <div class="metric-card">
@@ -412,10 +479,33 @@ function renderDashboard() {
         ${renderReviewModeButtons()}
       </aside>
     </section>
-    <section class="level-ladder" aria-label="Learning levels">
-      ${LEVELS.map(renderLevelCard).join('')}
-    </section>
+    ${renderLevelGroups()}
     ${renderMissionsSection()}
+  `;
+}
+
+function renderLevelGroups() {
+  return `
+    <section class="level-groups" aria-label="Learning levels">
+      ${LEVEL_GROUPS.map(renderLevelGroup).join('')}
+    </section>
+  `;
+}
+
+function renderLevelGroup(group) {
+  return `
+    <section class="level-group level-group-${group.id}" aria-labelledby="level-group-${group.id}">
+      <div class="level-group-heading">
+        <div>
+          <p class="eyebrow">${group.id === 'forming' ? 'Second chapter' : 'Foundation'}</p>
+          <h2 id="level-group-${group.id}">${group.title}</h2>
+        </div>
+        <p>${group.subtitle}</p>
+      </div>
+      <div class="level-ladder">
+        ${group.levels.map(renderLevelCard).join('')}
+      </div>
+    </section>
   `;
 }
 
@@ -503,24 +593,25 @@ function nextMissionPhaseId(missionId) {
 
 function renderPrimaryDashboardAction(current) {
   if (progress.finalExam.passed) {
-    return `<div class="completion-banner"><strong>French Numbers 1-100 Mastered</strong><span>Status: Mastered</span></div>`;
+    return `<div class="completion-banner"><strong>French numbers mastered</strong><span>Status: Mastered</span></div>`;
   }
 
   if (allLevelsComplete()) {
     return `
       <button class="primary-action" data-action="start-exam">
         Start Final Exam
-        <span>100 randomized questions - pass at 95%</span>
+        <span>${NUMBER_CARDS.length} randomized questions - pass at 95%</span>
       </button>
     `;
   }
 
   const state = getLevelState(current);
+  const level = LEVELS.find((item) => item.id === current);
   const label = state.learnComplete ? 'Continue Mastery' : 'Continue Learning';
   return `
     <button class="primary-action" data-action="continue-level" data-level="${current}">
       ${label}
-      <span>Level ${current}: ${LEVELS[current - 1].range}</span>
+      <span>Level ${current}: ${level.range}</span>
     </button>
   `;
 }
@@ -532,7 +623,8 @@ function renderLevelCard(level) {
   const percent = levelMasteryStats(level.id).percent;
   const fullyMastered = isLevelFullyMastered(level.id);
   const current = unlocked && !state.completed;
-  const label = state.completed ? (fullyMastered ? 'Mastered' : 'Practice unlocked') : unlocked ? `${mastered}/10 mastered` : 'Locked';
+  const totalCards = getLevelCards(level.id).length;
+  const label = state.completed ? (fullyMastered ? 'Mastered' : 'Practice unlocked') : unlocked ? `${mastered}/${totalCards} mastered` : 'Locked';
   const action = state.completed
     ? `data-action="start-level-master" data-level="${level.id}"`
     : unlocked
@@ -579,6 +671,7 @@ function renderLevelMasteryChip(label, state) {
 
 function renderLearn(levelId, index) {
   const cards = getLevelCards(levelId);
+  const level = LEVELS.find((item) => item.id === levelId);
   const lesson = PATTERN_LESSONS[levelId];
 
   if (lesson && index === 0) {
@@ -595,11 +688,11 @@ function renderLearn(levelId, index) {
       <div class="phase-copy">
         <p class="eyebrow">Level ${levelId} Learn Mode</p>
         <h1>No testing yet. Just notice the shape, sound, and pattern.</h1>
-        <p>Move card by card through ${LEVELS[levelId - 1].range}. You will practice only after every number has been introduced.</p>
+        <p>Move card by card through ${level.range}. You will practice only after every number has been introduced.</p>
       </div>
       <article class="number-stage">
         <span class="counter">${adjustedIndex + 1} / ${cards.length}</span>
-        <div class="giant-number">${card.number}</div>
+        <div class="giant-number">${formatNumber(card.number)}</div>
         <div class="french-word">${card.french}</div>
         <div class="pronunciation">${card.pronunciation}</div>
         <div class="control-row">
@@ -622,7 +715,7 @@ function renderPatternLesson(levelId, lesson) {
           .map(
             (example) => `
               <button class="pattern-example" data-action="play-audio" data-number="${example.number}">
-                <span>${example.number}</span>
+                <span>${formatNumber(example.number)}</span>
                 <strong>${example.math}</strong>
                 <em>${example.french}</em>
               </button>
@@ -652,7 +745,7 @@ function renderQuestionSession() {
   // direction is impossible to miss between questions.
   const answerKind = type.expectedKind === 'number' ? 'want-number' : 'want-french';
   const directionKey = `${activeSession.index}-${type.id}`;
-  const placeholder = type.expectedKind === 'number' ? 'e.g. 42' : 'e.g. quarante-deux';
+  const placeholder = type.expectedKind === 'number' ? 'e.g. 1,234' : 'e.g. quarante-deux';
   const answerLabel = type.expectedKind === 'number' ? 'Type the number (digits)' : 'Type the French spelling (words)';
   const audioAvailable = hasPlayableAudio(card);
 
@@ -748,12 +841,12 @@ function renderQuestionPrompt(question) {
     `;
   }
 
-  const prompt = question.type.expectedKind === 'french' ? question.card.number : question.card.french;
+  const prompt = question.type.expectedKind === 'french' ? formatNumber(question.card.number) : question.card.french;
   return `<div class="written-prompt">${prompt}</div>`;
 }
 
 function renderFeedback(answer, card, type) {
-  const expected = type.expectedKind === 'number' ? card.number : card.french;
+  const expected = type.expectedKind === 'number' ? formatNumber(card.number) : card.french;
   return `
     <div class="feedback ${answer.correct ? 'is-correct' : 'is-wrong'}" role="status">
       <span class="feedback-icon" aria-hidden="true">${answer.correct ? '&check;' : '&times;'}</span>
@@ -772,7 +865,7 @@ function renderSessionResults() {
   const isDimensionMaster = activeSession.kind === 'dimension-master';
   const isMission = activeSession.kind === 'mission';
   const title = isExam && passed
-    ? 'French Numbers 1-100 Mastered'
+      ? 'French numbers mastered'
     : isDimensionMaster && passed
       ? `${dimensionLabel(activeSession.dimension)} mastered`
       : isMission && passed
@@ -997,11 +1090,12 @@ function goDashboard() {
 function continueLevel(levelId) {
   if (!isLevelUnlocked(levelId)) return;
   const state = getLevelState(levelId);
+  const totalCards = getLevelCards(levelId).length;
   activeAnswer = null;
 
   if (!state.learnComplete) {
     route = { name: 'learn', levelId, index: 0 };
-  } else if (masteredCount(levelId) < 10) {
+  } else if (masteredCount(levelId) < totalCards) {
     startLevelMastery(levelId);
     return;
   } else if (!state.reviewPassed) {
@@ -1350,7 +1444,7 @@ function finishSession() {
 }
 
 function getUnlockedCards() {
-  const maxLevel = allLevelsComplete() ? 10 : currentLevelId();
+  const maxLevel = allLevelsComplete() ? LEVELS.at(-1).id : currentLevelId();
   return NUMBER_CARDS.filter((card) => card.levelId <= maxLevel && progress.levels[card.levelId].learnComplete);
 }
 
