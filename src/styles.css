@@ -100,6 +100,14 @@ button {
   margin-bottom: clamp(1.5rem, 4vw, 3rem);
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
 .brand {
   display: inline-flex;
   align-items: center;
@@ -156,6 +164,131 @@ button {
 .status-mastered {
   background: #e8f6ed;
   color: var(--green);
+}
+
+.locale-switcher {
+  display: flex;
+  align-items: stretch;
+  gap: 0.35rem;
+  min-width: 0;
+  padding: 0.35rem;
+  border: 1px solid var(--line);
+  border-radius: 1.1rem;
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.locale-option-wrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.locale-option {
+  display: grid;
+  gap: 0.05rem;
+  min-width: 6.25rem;
+  min-height: 3rem;
+  padding: 0.45rem 0.65rem;
+  border: 1px solid transparent;
+  border-radius: 0.85rem;
+  background: transparent;
+  text-align: left;
+}
+
+.locale-option strong,
+.locale-option span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.locale-option strong {
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0;
+}
+
+.locale-option span {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.locale-option.is-active {
+  border-color: rgba(40, 75, 255, 0.72);
+  background:
+    linear-gradient(180deg, rgba(40, 75, 255, 0.08), rgba(255, 255, 255, 0.9)),
+    white;
+  color: var(--ink);
+  cursor: default;
+  box-shadow: inset 0 -0.22rem 0 rgba(40, 75, 255, 0.22);
+}
+
+.locale-option.is-active span {
+  color: #3550c9;
+}
+
+.locale-option.is-disabled {
+  color: var(--muted);
+  opacity: 0.46;
+  filter: grayscale(1);
+  cursor: not-allowed;
+}
+
+.locale-option:focus-visible,
+.locale-option-wrap:focus-visible {
+  outline: 3px solid rgba(40, 75, 255, 0.36);
+  outline-offset: 3px;
+}
+
+.locale-option-wrap::after {
+  position: absolute;
+  right: 50%;
+  bottom: calc(100% + 0.55rem);
+  z-index: 10;
+  width: max-content;
+  max-width: 15rem;
+  padding: 0.55rem 0.65rem;
+  border: 1px solid var(--ink);
+  border-radius: 0.7rem;
+  background: var(--ink);
+  color: white;
+  box-shadow: 0 0.8rem 2rem rgba(28, 25, 19, 0.18);
+  content: attr(data-tooltip);
+  font-size: 0.78rem;
+  font-weight: 800;
+  line-height: 1.25;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(50%, 0.25rem);
+  transition: opacity 140ms ease, transform 140ms ease;
+}
+
+.locale-option-wrap::before {
+  position: absolute;
+  right: 50%;
+  bottom: calc(100% + 0.25rem);
+  z-index: 11;
+  width: 0.6rem;
+  height: 0.6rem;
+  background: var(--ink);
+  content: '';
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(50%, 0.25rem) rotate(45deg);
+  transition: opacity 140ms ease, transform 140ms ease;
+}
+
+.locale-option-wrap:hover::after,
+.locale-option-wrap:hover::before,
+.locale-option-wrap:focus-within::after,
+.locale-option-wrap:focus-within::before {
+  opacity: 1;
+  transform: translate(50%, 0) rotate(0);
+}
+
+.locale-option-wrap:hover::before,
+.locale-option-wrap:focus-within::before {
+  transform: translate(50%, 0) rotate(45deg);
 }
 
 .dashboard-grid,
@@ -825,7 +958,7 @@ h2 {
   --kind-soft: rgba(40, 75, 255, 0.12);
 }
 
-/* Answer-kind theming: blue = type French words, gold = type a number */
+/* Answer-kind theming: blue = type Standard French words, gold = type a number */
 .quiz-layout.want-french {
   --kind: var(--blue);
   --kind-soft: rgba(40, 75, 255, 0.12);
@@ -1246,6 +1379,22 @@ input:focus {
     margin-bottom: 1rem;
   }
 
+  .header-actions {
+    flex: 1 1 auto;
+    flex-wrap: wrap;
+  }
+
+  .locale-switcher {
+    order: 2;
+    width: 100%;
+    overflow-x: auto;
+    padding: 0.3rem;
+  }
+
+  .locale-option {
+    min-width: 5.65rem;
+  }
+
   .brand {
     min-width: 0;
   }
@@ -1422,6 +1571,11 @@ input:focus {
 
   .app-header {
     align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .header-actions {
+    width: 100%;
   }
 
   .brand {
@@ -1442,6 +1596,42 @@ input:focus {
   .status-pill {
     max-width: 8.5rem;
     text-align: center;
+  }
+
+  .locale-switcher {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    overflow: visible;
+  }
+
+  .locale-option {
+    min-width: 0;
+    width: 100%;
+    padding: 0.45rem 0.4rem;
+  }
+
+  .locale-option strong,
+  .locale-option span {
+    text-align: center;
+  }
+
+  .locale-option span {
+    display: none;
+  }
+
+  .locale-option-wrap::after {
+    right: 0;
+    max-width: min(15rem, calc(100vw - 1rem));
+    transform: translate(0, 0.25rem);
+  }
+
+  .locale-option-wrap::before {
+    right: 50%;
+  }
+
+  .locale-option-wrap:hover::after,
+  .locale-option-wrap:focus-within::after {
+    transform: translate(0, 0);
   }
 
   h1 {

@@ -1,4 +1,6 @@
 import {
+  ACTIVE_FRENCH_LOCALE,
+  FRENCH_LOCALES,
   LEVELS,
   NUMBER_CARDS,
   PATTERN_LESSONS,
@@ -14,6 +16,7 @@ const LEVEL_REVIEW_PASSING_SCORE = 90;
 const FINAL_EXAM_PASSING_SCORE = 95;
 const DIMENSION_MASTERY_SCORE = 100;
 const MISSION_PASSING_SCORE = 100;
+const UNAVAILABLE_LOCALE_TOOLTIP = 'Currently unavailable, coming in the next few updates.';
 const AUDIO_BASE_URL = new URL('../assets/audio/', import.meta.url);
 const RECORDED_AUDIO_NUMBERS = new Set([0, ...NUMBER_CARDS.map((card) => card.number)]);
 const GENERATED_AUDIO_NUMBERS = new Set();
@@ -28,7 +31,7 @@ const LEVEL_GROUPS = [
   {
     id: 'forming',
     title: 'Number forming',
-    subtitle: 'Assemble hundreds, thousands, millions, and milliards from reusable French parts.',
+    subtitle: 'Assemble hundreds, thousands, millions, and milliards from reusable Standard French parts.',
     levels: LEVELS.filter((level) => level.id > 10),
   },
 ];
@@ -52,12 +55,12 @@ const REVIEW_MODES = [
   {
     id: 'listening',
     title: 'Listening Review',
-    description: 'Hear French audio in random order. Type the number digits.',
+    description: 'Hear Standard French audio in random order. Type the number digits.',
   },
   {
     id: 'writing',
     title: 'Writing Review',
-    description: 'See digits in random order. Type the French spelling, then hear it.',
+    description: 'See digits in random order. Type the Standard French spelling, then hear it.',
   },
   {
     id: 'mixed',
@@ -432,11 +435,42 @@ function renderHeader() {
         <span class="brand-mark">FR</span>
         <span>
           <strong>Count in French</strong>
-          <small>1 to 1 billion+ fluency trainer</small>
+          <small>${ACTIVE_FRENCH_LOCALE.shortLabel} number trainer</small>
         </span>
       </button>
-      <div class="status-pill ${progress.finalExam.passed ? 'status-mastered' : ''}">${status}</div>
+      <div class="header-actions">
+        ${renderLocaleSwitcher()}
+        <div class="status-pill ${progress.finalExam.passed ? 'status-mastered' : ''}">${status}</div>
+      </div>
     </header>
+  `;
+}
+
+function renderLocaleSwitcher() {
+  return `
+    <div class="locale-switcher" aria-label="French number locale">
+      ${FRENCH_LOCALES.map(renderLocaleOption).join('')}
+    </div>
+  `;
+}
+
+function renderLocaleOption(locale) {
+  if (locale.available) {
+    return `
+      <button class="locale-option is-active" type="button" data-locale="${locale.id}" aria-pressed="true" title="${locale.description}">
+        <strong>${locale.shortLabel}</strong>
+        <span>${locale.label}</span>
+      </button>
+    `;
+  }
+
+  return `
+    <span class="locale-option-wrap" data-tooltip="${UNAVAILABLE_LOCALE_TOOLTIP}" tabindex="0" aria-label="${locale.label}: ${UNAVAILABLE_LOCALE_TOOLTIP}">
+      <button class="locale-option is-disabled" type="button" data-locale="${locale.id}" disabled aria-disabled="true" title="${UNAVAILABLE_LOCALE_TOOLTIP}">
+        <strong>${locale.shortLabel}</strong>
+        <span>${locale.label}</span>
+      </button>
+    </span>
   `;
 }
 
@@ -454,9 +488,9 @@ function renderDashboard() {
   return `
     <section class="dashboard-grid">
       <div class="intro-panel">
-        <p class="eyebrow">Teach. Recall. Recycle. Master.</p>
-        <h1>Build instant French number fluency.</h1>
-        <p class="lede">Move through focused levels, hear available audio, write from memory, then optionally master each completed level in Writing and Hearing at 100%.</p>
+        <p class="eyebrow">${ACTIVE_FRENCH_LOCALE.label} numbers</p>
+        <h1>Build instant Standard French number fluency.</h1>
+        <p class="lede">Move through focused levels using the France/standard number forms, hear available audio, write from memory, then optionally master each completed level in Writing and Hearing at 100%.</p>
         <div class="metric-row">
           <div class="metric-card">
             <strong>${current}</strong>
@@ -593,7 +627,7 @@ function nextMissionPhaseId(missionId) {
 
 function renderPrimaryDashboardAction(current) {
   if (progress.finalExam.passed) {
-    return `<div class="completion-banner"><strong>French numbers mastered</strong><span>Status: Mastered</span></div>`;
+    return `<div class="completion-banner"><strong>Standard French numbers mastered</strong><span>Status: Mastered</span></div>`;
   }
 
   if (allLevelsComplete()) {
@@ -686,7 +720,7 @@ function renderLearn(levelId, index) {
   return `
     <section class="learn-layout">
       <div class="phase-copy">
-        <p class="eyebrow">Level ${levelId} Learn Mode</p>
+        <p class="eyebrow">Level ${levelId} Learn Mode · ${ACTIVE_FRENCH_LOCALE.shortLabel}</p>
         <h1>No testing yet. Just notice the shape, sound, and pattern.</h1>
         <p>Move card by card through ${level.range}. You will practice only after every number has been introduced.</p>
       </div>
@@ -746,7 +780,7 @@ function renderQuestionSession() {
   const answerKind = type.expectedKind === 'number' ? 'want-number' : 'want-french';
   const directionKey = `${activeSession.index}-${type.id}`;
   const placeholder = type.expectedKind === 'number' ? 'e.g. 1,234' : 'e.g. quarante-deux';
-  const answerLabel = type.expectedKind === 'number' ? 'Type the number (digits)' : 'Type the French spelling (words)';
+  const answerLabel = type.expectedKind === 'number' ? 'Type the number (digits)' : 'Type the Standard French spelling (words)';
   const audioAvailable = hasPlayableAudio(card);
 
   return `
@@ -814,12 +848,12 @@ function renderDirectionBanner(type, directionKey) {
     ? '<span class="dir-chip is-audio"><span class="dir-ico" aria-hidden="true"></span>Audio</span>'
     : type.expectedKind === 'french'
       ? '<span class="dir-chip is-digits">A number</span>'
-      : '<span class="dir-chip is-words">French word</span>';
+      : '<span class="dir-chip is-words">Standard French word</span>';
 
   const toChip =
     type.expectedKind === 'number'
       ? '<span class="dir-chip dir-target is-digits">Type the number</span>'
-      : '<span class="dir-chip dir-target is-words">Type the French word</span>';
+      : '<span class="dir-chip dir-target is-words">Type Standard French</span>';
 
   // key forces the element to remount each question so the animation replays.
   return `
@@ -834,7 +868,7 @@ function renderDirectionBanner(type, directionKey) {
 function renderQuestionPrompt(question) {
   if (question.type.audioOnly) {
     return `
-      <button type="button" class="audio-prompt" data-action="play-audio" data-number="${question.card.number}" aria-label="Play French audio">
+      <button type="button" class="audio-prompt" data-action="play-audio" data-number="${question.card.number}" aria-label="Play Standard French audio">
         <span class="audio-wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
         <span class="audio-hint">Tap to listen</span>
       </button>
@@ -865,7 +899,7 @@ function renderSessionResults() {
   const isDimensionMaster = activeSession.kind === 'dimension-master';
   const isMission = activeSession.kind === 'mission';
   const title = isExam && passed
-      ? 'French numbers mastered'
+      ? 'Standard French numbers mastered'
     : isDimensionMaster && passed
       ? `${dimensionLabel(activeSession.dimension)} mastered`
       : isMission && passed
@@ -941,7 +975,7 @@ function renderReviewScreen() {
     <section class="review-screen">
       <p class="eyebrow">Review center</p>
       <h1>Choose how you want memory to be tested.</h1>
-      <p>Listening and Writing keep one recall pathway isolated. Mixed and Adaptive are for switching practice once both pathways feel stable.</p>
+      <p>Listening and Writing keep one Standard French recall pathway isolated. Mixed and Adaptive are for switching practice once both pathways feel stable.</p>
       <div class="review-options">
         ${renderReviewModeButtons()}
       </div>

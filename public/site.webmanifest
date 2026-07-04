@@ -1,7 +1,7 @@
 {
   "name": "Count in French",
   "short_name": "Count French",
-  "description": "Practice and master French numbers from 1 through billions.",
+  "description": "Practice and master Standard French numbers from 1 through billions.",
   "start_url": ".",
   "scope": ".",
   "display": "standalone",
