@@ -58,6 +58,42 @@ export const LEVELS = [...BASE_LEVELS, ...LARGE_NUMBER_LEVELS];
 
 const MAX_SUPPORTED_NUMBER = 999999999999;
 
+export const ACTIVE_FRENCH_LOCALE_ID = 'fr-standard';
+export const FRENCH_LOCALES = [
+  {
+    id: ACTIVE_FRENCH_LOCALE_ID,
+    shortLabel: 'FR Standard',
+    label: 'Standard French',
+    description: 'France and standard international French numbering',
+    available: true,
+  },
+  {
+    id: 'fr-be',
+    shortLabel: 'BE French',
+    label: 'Belgian French',
+    description: 'Belgian French numbering',
+    available: false,
+  },
+  {
+    id: 'fr-ch',
+    shortLabel: 'CH French',
+    label: 'Swiss French',
+    description: 'Swiss French numbering',
+    available: false,
+  },
+  {
+    id: 'fr-ca',
+    shortLabel: 'CA French',
+    label: 'Canadian French',
+    description: 'Canadian French numbering',
+    available: false,
+  },
+];
+
+export const ACTIVE_FRENCH_LOCALE = FRENCH_LOCALES.find(
+  (locale) => locale.id === ACTIVE_FRENCH_LOCALE_ID,
+);
+
 const SIMPLE_NUMBERS = new Map([
   [0, 'zéro'],
   [1, 'un'],
@@ -116,14 +152,14 @@ const PRONUNCIATION = new Map([
 export const QUESTION_TYPES = [
   {
     id: 'number-to-french',
-    label: 'Number -> French',
-    promptLabel: 'Write the French spelling',
+    label: 'Number -> Standard French',
+    promptLabel: 'Write the Standard French spelling',
     inputMode: 'text',
     expectedKind: 'french',
   },
   {
     id: 'french-to-number',
-    label: 'French -> Number',
+    label: 'Standard French -> Number',
     promptLabel: 'Write the number',
     inputMode: 'numeric',
     expectedKind: 'number',
@@ -138,8 +174,8 @@ export const QUESTION_TYPES = [
   },
   {
     id: 'audio-to-french',
-    label: 'Audio -> French',
-    promptLabel: 'Listen and write the French spelling',
+    label: 'Audio -> Standard French',
+    promptLabel: 'Listen and write the Standard French spelling',
     inputMode: 'text',
     expectedKind: 'french',
     audioOnly: true,
@@ -148,7 +184,7 @@ export const QUESTION_TYPES = [
 
 export function numberToFrench(number) {
   if (!Number.isInteger(number) || number < 0 || number > MAX_SUPPORTED_NUMBER) {
-    throw new RangeError('Count in French supports numbers from 0 to 999,999,999,999.');
+    throw new RangeError('Count in French supports Standard French numbers from 0 to 999,999,999,999.');
   }
 
   if (number === 0) return SIMPLE_NUMBERS.get(0);
@@ -222,7 +258,7 @@ function composeNineties(number) {
 
 export function numberToPronunciation(number) {
   if (!Number.isInteger(number) || number < 0 || number > MAX_SUPPORTED_NUMBER) {
-    throw new RangeError('Count in French supports numbers from 0 to 999,999,999,999.');
+    throw new RangeError('Count in French supports Standard French numbers from 0 to 999,999,999,999.');
   }
 
   if (number > 100) return 'Build from the parts';
@@ -279,7 +315,7 @@ export function buildNumberCards() {
 
 export function buildNumberCard(number) {
   if (!Number.isInteger(number) || number < 0 || number > MAX_SUPPORTED_NUMBER) {
-    throw new RangeError('Count in French supports numbers from 0 to 999,999,999,999.');
+    throw new RangeError('Count in French supports Standard French numbers from 0 to 999,999,999,999.');
   }
 
   return {
@@ -299,9 +335,9 @@ export const NUMBER_CARDS = buildNumberCards();
 export const PATTERN_LESSONS = {
   7: {
     eyebrow: 'Pattern lesson: 70 begins the twist',
-    title: 'French builds 70 as 60 + 10',
+    title: 'Standard French builds 70 as 60 + 10',
     explanation:
-      'Instead of a new word for seventy, French says soixante-dix: sixty-ten. This is the bridge into 70-79.',
+      'Instead of a new word for seventy, Standard French says soixante-dix: sixty-ten. This is the bridge into 70-79.',
     examples: [
       { number: 70, math: '60 + 10', french: numberToFrench(70) },
       { number: 71, math: '60 + 11', french: numberToFrench(71) },
@@ -322,7 +358,7 @@ export const PATTERN_LESSONS = {
     eyebrow: 'Pattern lesson: 80-89 and 90',
     title: 'After 80, count upward from four twenties',
     explanation:
-      'For 81-89, French keeps quatre-vingt and adds the unit. At 90, it becomes quatre-vingt-dix: eighty-ten.',
+      'For 81-89, Standard French keeps quatre-vingt and adds the unit. At 90, it becomes quatre-vingt-dix: eighty-ten.',
     examples: [
       { number: 81, math: '80 + 1', french: numberToFrench(81) },
       { number: 89, math: '80 + 9', french: numberToFrench(89) },
@@ -333,7 +369,7 @@ export const PATTERN_LESSONS = {
     eyebrow: 'Pattern lesson: 90-99',
     title: 'The 90s are 80 plus teen numbers',
     explanation:
-      'French does not use a separate word for ninety. It says quatre-vingt plus ten through nineteen.',
+      'Standard French does not use a separate word for ninety. It says quatre-vingt plus ten through nineteen.',
     examples: [
       { number: 91, math: '80 + 11', french: numberToFrench(91) },
       { number: 95, math: '80 + 15', french: numberToFrench(95) },
@@ -355,7 +391,7 @@ export const PATTERN_LESSONS = {
     eyebrow: 'Pattern lesson: thousands',
     title: 'Mille does not need un and does not change',
     explanation:
-      'French says mille for 1,000, then adds the rest. For higher thousands, put the number before mille.',
+      'Standard French says mille for 1,000, then adds the rest. For higher thousands, put the number before mille.',
     examples: [
       { number: 1000, math: '1,000', french: numberToFrench(1000) },
       { number: 2000, math: '2 x 1,000', french: numberToFrench(2000) },
@@ -388,7 +424,7 @@ export const PATTERN_LESSONS = {
     eyebrow: 'Pattern lesson: billions',
     title: 'English billion is French milliard',
     explanation:
-      'French uses milliard for 1,000,000,000. Build the full number as milliards, millions, mille, then hundreds.',
+      'Standard French uses milliard for 1,000,000,000. Build the full number as milliards, millions, mille, then hundreds.',
     examples: [
       { number: 1000000000, math: '1,000,000,000', french: numberToFrench(1000000000) },
       { number: 2000000000, math: '2 x 1,000,000,000', french: numberToFrench(2000000000) },

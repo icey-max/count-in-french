@@ -3,6 +3,9 @@ import assert from 'node:assert/strict';
 import { existsSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import {
+  ACTIVE_FRENCH_LOCALE,
+  ACTIVE_FRENCH_LOCALE_ID,
+  FRENCH_LOCALES,
   NUMBER_CARDS,
   buildNumberCard,
   normalizeFrenchAnswer,
@@ -11,7 +14,17 @@ import {
   validateAnswer,
 } from '../src/numbers.js';
 
-test('generates the full French number practice deck', () => {
+test('declares Standard French as the active supported locale', () => {
+  assert.equal(ACTIVE_FRENCH_LOCALE_ID, 'fr-standard');
+  assert.equal(ACTIVE_FRENCH_LOCALE.shortLabel, 'FR Standard');
+  assert.equal(FRENCH_LOCALES.length, 4);
+  assert.deepEqual(
+    FRENCH_LOCALES.filter((locale) => locale.available).map((locale) => locale.id),
+    ['fr-standard'],
+  );
+});
+
+test('generates the full Standard French number practice deck', () => {
   assert.equal(NUMBER_CARDS.length, 150);
   assert.equal(numberToFrench(1), 'un');
   assert.equal(numberToFrench(17), 'dix-sept');
@@ -26,7 +39,7 @@ test('generates the full French number practice deck', () => {
   assert.equal(numberToFrench(100), 'cent');
 });
 
-test('generates French spellings for large number patterns', () => {
+test('generates Standard French spellings for large number patterns', () => {
   assert.equal(numberToFrench(101), 'cent un');
   assert.equal(numberToFrench(200), 'deux cents');
   assert.equal(numberToFrench(201), 'deux cent un');
@@ -57,20 +70,20 @@ test('builds a zero card for missions without adding it to the level deck', () =
   });
 });
 
-test('normalizes French answers according to PRD rules', () => {
+test('normalizes Standard French answers according to PRD rules', () => {
   assert.equal(normalizeFrenchAnswer(' QUARANTE-DEUX '), 'quarantedeux');
   assert.equal(normalizeFrenchAnswer('quarante deux'), 'quarantedeux');
   assert.equal(normalizeFrenchAnswer('quarante-deux'), 'quarantedeux');
   assert.equal(normalizeFrenchAnswer('quarantedeux'), 'quarantedeux');
 });
 
-test('validates French text without accepting numerals for text prompts', () => {
+test('validates Standard French text without accepting numerals for text prompts', () => {
   const card = NUMBER_CARDS[41];
   assert.equal(validateAnswer('quarante deux', card, 'french'), true);
   assert.equal(validateAnswer('42', card, 'french'), false);
 });
 
-test('validates number prompts without accepting French words', () => {
+test('validates number prompts without accepting Standard French words', () => {
   const card = NUMBER_CARDS[41];
   assert.equal(normalizeNumberAnswer(' 42 '), 42);
   assert.equal(normalizeNumberAnswer('1,234,567'), 1234567);

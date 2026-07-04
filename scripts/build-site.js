@@ -80,16 +80,16 @@ function renderSitemap() {
 function renderLlmsText() {
   return `# Count in French
 
-> Free browser-based trainer for learning French numbers from 1 through billions with pronunciation practice, spelling practice, recall quizzes, adaptive review, and a final exam.
+> Free browser-based trainer for learning Standard French numbers from 1 through billions with pronunciation practice, spelling practice, recall quizzes, adaptive review, and a final exam.
 
 Website: ${siteUrl}
 
 ## What it teaches
 
-- French numbers 1 through billions
-- French number spelling, including 70-79, 80-89, 90-99, hundreds, thousands, millions, and billions
-- French number pronunciation through audio prompts
-- Fast recall from digits to French and from spoken French to numbers
+- Standard French numbers 1 through billions
+- Standard French number spelling, including 70-79, 80-89, 90-99, hundreds, thousands, millions, and billions
+- Standard French number pronunciation through audio prompts
+- Fast recall from digits to Standard French and from spoken Standard French to numbers
 
 ## Useful entry points
 
@@ -99,6 +99,6 @@ Website: ${siteUrl}
 
 ## Content notes
 
-The site is a static educational web app. It does not require an account, does not use a backend, and stores learner progress locally in the browser.
+The site is a static educational web app. It currently teaches the FR Standard locale only. Belgian French, Swiss French, and Canadian French are shown in the app as disabled future locale options. It does not require an account, does not use a backend, and stores learner progress locally in the browser.
 `;
 }
