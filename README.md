@@ -1,14 +1,14 @@
-# Count in French: Standard French Number Practice
+# Count in French: Standard French Numbers and Essentials
 
-Learn Standard French numbers from 1 through billions with short lessons, audio practice, recall drills, and review.
+Learn Standard French numbers from 1 through billions, then build recognition for common verbs, prepositions, colors, days, and months with audio-first recall drills.
 
 Open the app: https://icey-max.github.io/count-in-french/
 
-![Count in French demo: dashboard, lesson cards, and a typed answer](assets/readme/count-in-french-demo.gif)
+![Count in French demo: dashboard, essentials cards, highlighted verb example, and answer feedback](assets/readme/count-in-french-demo.gif)
 
 ## What This Helps You Learn
 
-Count in French is for beginners who want Standard French numbers to feel automatic. It trains you to recognize numbers by sight, write them in Standard French, understand them when you hear them, and remember the patterns behind the difficult ranges.
+Count in French is for beginners who want Standard French numbers and everyday starter vocabulary to feel automatic. It trains you to recognize numbers by sight, write them in Standard French, understand them when you hear them, and remember the patterns behind the difficult ranges.
 
 The active number system is `FR Standard`, meaning the France/standard international French forms such as `soixante-dix`, `quatre-vingts`, and `quatre-vingt-dix`. Belgian French, Swiss French, and Canadian French locale options are shown in the app as disabled placeholders for future updates.
 
@@ -19,6 +19,9 @@ You will practice:
 - Seeing digits and writing the Standard French spelling.
 - Remembering numbers you missed before.
 - Understanding the 70s, 80s, 90s, hundreds, `mille`, `million`, and `milliard` patterns.
+- Recognizing 50 high-frequency verbs with present-tense support, highlighted example sentences, and French audio.
+- Recognizing 20 beginner prepositions with highlighted example sentences.
+- Practicing 16 useful colors, the days of the week, and the months of the year.
 
 ## Why Standard French Numbers Need Practice
 
@@ -38,6 +41,8 @@ Start at Level 1 and move through the numbers in small groups. Each level introd
 
 After you finish the levels, use mixed review and the final exam to check whether you can handle the full course deck without relying on the order of a lesson.
 
+Use the French essentials section for short recall challenges outside the number course. Verb prompts emphasize recognition first: you answer the infinitive, while highlighted example sentences and present-tense forms give you context without turning the drill into a conjugation test.
+
 ## What Makes It Useful
 
 - Small lessons keep practice manageable.
@@ -45,6 +50,8 @@ After you finish the levels, use mixed review and the final exam to check whethe
 - Active recall makes you type answers instead of only recognizing them.
 - Adaptive review brings missed numbers back into practice.
 - The final exam checks the full course deck, including hundreds, thousands, millions, and billions.
+- Essentials challenges add common vocabulary without requiring an account or a separate app.
+- Highlighted examples make it easier to see how verbs and prepositions appear inside real French phrases.
 
 ## Privacy
 
