@@ -13,6 +13,15 @@ import {
   numberToFrench,
   validateAnswer,
 } from '../src/numbers.js';
+import {
+  ESSENTIAL_GROUPS,
+  ESSENTIAL_ITEMS,
+  buildEssentialChallengeQuestions,
+  getEssentialAnswerKind,
+  isCalendarSequenceGroup,
+  shouldAutoPlayEssentialQuestion,
+  validateEssentialAnswer,
+} from '../src/essentials.js';
 
 test('declares Standard French as the active supported locale', () => {
   assert.equal(ACTIVE_FRENCH_LOCALE_ID, 'fr-standard');
@@ -99,6 +108,81 @@ test('rejects numbers outside the supported range', () => {
 test('has non-empty audio files for every recorded number', () => {
   for (const number of [0, ...NUMBER_CARDS.map((card) => card.number)]) {
     const audioPath = join('assets', 'audio', `${number}.mp3`);
+    assert.equal(existsSync(audioPath), true, `${audioPath} is missing`);
+    assert.ok(statSync(audioPath).size > 0, `${audioPath} is empty`);
+  }
+});
+
+test('defines beginner essentials for verbs, prepositions, colors, and days', () => {
+  assert.deepEqual(
+    ESSENTIAL_GROUPS.map((group) => group.id),
+    ['verbs', 'prepositions', 'colors', 'days', 'months'],
+  );
+  const verbs = ESSENTIAL_GROUPS.find((group) => group.id === 'verbs');
+  const prepositions = ESSENTIAL_GROUPS.find((group) => group.id === 'prepositions');
+  assert.equal(ESSENTIAL_GROUPS.find((group) => group.id === 'days').illustration, false);
+  assert.equal(ESSENTIAL_GROUPS.find((group) => group.id === 'months').illustration, false);
+  assert.equal(verbs.items.length, 50);
+  assert.equal(prepositions.items.length, 20);
+  assert.equal(ESSENTIAL_GROUPS.find((group) => group.id === 'colors').items.length, 16);
+  assert.equal(ESSENTIAL_ITEMS.length, 105);
+  assert.ok(ESSENTIAL_ITEMS.every((item) => item.id && item.french && item.display && item.english));
+  assert.ok([...verbs.items, ...prepositions.items].every((item) => item.example && item.highlight && item.example.includes(item.highlight)));
+  assert.ok(
+    verbs.items.every((item) =>
+      ['je', 'tu', 'il', 'nous', 'vous', 'ils'].every((pronoun) => item.conjugation?.[pronoun]),
+    ),
+  );
+});
+
+test('builds extensive calendar challenges with listening, dictation, translation, and final sequence modes', () => {
+  const days = ESSENTIAL_GROUPS.find((group) => group.id === 'days');
+  const months = ESSENTIAL_GROUPS.find((group) => group.id === 'months');
+
+  for (const group of [days, months]) {
+    assert.equal(isCalendarSequenceGroup(group), true);
+    const questions = buildEssentialChallengeQuestions(group);
+    assert.equal(questions.length, group.items.length * 3 + 1);
+    assert.deepEqual(
+      [...new Set(questions.map((question) => question.mode))],
+      ['listening', 'dictation', 'translate', 'sequence'],
+    );
+    assert.equal(questions.filter((question) => question.mode === 'translate').every((question) => getEssentialAnswerKind(question) === 'english'), true);
+    assert.equal(questions.filter((question) => question.mode !== 'sequence').every(shouldAutoPlayEssentialQuestion), true);
+    assert.equal(shouldAutoPlayEssentialQuestion(questions.at(-1)), false);
+    assert.equal(getEssentialAnswerKind(questions.at(-1)), 'sequence');
+  }
+});
+
+test('validates day challenge answers in French and English directions', () => {
+  const lundi = ESSENTIAL_ITEMS.find((item) => item.id === 'lundi');
+  assert.equal(validateEssentialAnswer('lundi', lundi, 'french'), true);
+  assert.equal(validateEssentialAnswer('Monday', lundi, 'english'), true);
+  assert.equal(validateEssentialAnswer('lundi', lundi, 'english'), false);
+  assert.equal(validateEssentialAnswer('Monday', lundi, 'french'), false);
+});
+
+test('validates the final day sequence as one French day per line', () => {
+  const days = ESSENTIAL_GROUPS.find((group) => group.id === 'days');
+  const ordered = days.items.map((item) => item.display).join('\n');
+  const swapped = ['lundi', 'mercredi', 'mardi', 'jeudi', 'vendredi', 'samedi', 'dimanche'].join('\n');
+  assert.equal(validateEssentialAnswer(ordered, days.items, 'sequence'), true);
+  assert.equal(validateEssentialAnswer(swapped, days.items, 'sequence'), false);
+  assert.equal(validateEssentialAnswer('lundi mardi mercredi jeudi vendredi samedi dimanche', days.items, 'sequence'), false);
+});
+
+test('validates the final month sequence as one French month per line', () => {
+  const months = ESSENTIAL_GROUPS.find((group) => group.id === 'months');
+  const ordered = months.items.map((item) => item.display).join('\n');
+  const swapped = ['janvier', 'mars', 'février', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'].join('\n');
+  assert.equal(validateEssentialAnswer(ordered, months.items, 'sequence'), true);
+  assert.equal(validateEssentialAnswer(swapped, months.items, 'sequence'), false);
+  assert.equal(validateEssentialAnswer(months.items.map((item) => item.display).join(' '), months.items, 'sequence'), false);
+});
+
+test('has non-empty Sound of Text audio files for every essential item', () => {
+  for (const item of ESSENTIAL_ITEMS) {
+    const audioPath = join('assets', 'audio', 'essentials', `${item.id}.mp3`);
     assert.equal(existsSync(audioPath), true, `${audioPath} is missing`);
     assert.ok(statSync(audioPath).size > 0, `${audioPath} is empty`);
   }

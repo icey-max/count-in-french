@@ -80,7 +80,7 @@ function renderSitemap() {
 function renderLlmsText() {
   return `# Count in French
 
-> Free browser-based trainer for learning Standard French numbers from 1 through billions with pronunciation practice, spelling practice, recall quizzes, adaptive review, and a final exam.
+> Free browser-based trainer for learning Standard French numbers from 1 through billions plus common verbs, prepositions, colors, days, and months with audio recall drills.
 
 Website: ${siteUrl}
 
@@ -90,6 +90,9 @@ Website: ${siteUrl}
 - Standard French number spelling, including 70-79, 80-89, 90-99, hundreds, thousands, millions, and billions
 - Standard French number pronunciation through audio prompts
 - Fast recall from digits to Standard French and from spoken Standard French to numbers
+- 50 high-frequency French verbs with present-tense support and highlighted examples
+- 20 beginner French prepositions with highlighted examples
+- Useful colors, days of the week, and months of the year
 
 ## Useful entry points
 

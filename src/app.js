@@ -8,6 +8,15 @@ import {
   buildNumberCard,
   validateAnswer,
 } from './numbers.js';
+import {
+  ESSENTIAL_GROUPS,
+  ESSENTIAL_ITEMS,
+  buildEssentialChallengeQuestions,
+  getEssentialAnswerKind,
+  isCalendarSequenceGroup,
+  shouldAutoPlayEssentialQuestion,
+  validateEssentialAnswer,
+} from './essentials.js';
 
 const STORAGE_KEY = 'countInFrench.progress.v1';
 const LEGACY_STORAGE_KEY = 'frenchNumbersMastery.progress.v1';
@@ -17,7 +26,9 @@ const FINAL_EXAM_PASSING_SCORE = 95;
 const DIMENSION_MASTERY_SCORE = 100;
 const MISSION_PASSING_SCORE = 100;
 const UNAVAILABLE_LOCALE_TOOLTIP = 'Currently unavailable, coming in the next few updates.';
+const GITHUB_REPO_URL = 'https://github.com/icey-max/count-in-french';
 const AUDIO_BASE_URL = new URL('../assets/audio/', import.meta.url);
+const ESSENTIAL_AUDIO_BASE_URL = new URL('../assets/audio/essentials/', import.meta.url);
 const RECORDED_AUDIO_NUMBERS = new Set([0, ...NUMBER_CARDS.map((card) => card.number)]);
 const GENERATED_AUDIO_NUMBERS = new Set();
 const TOTAL_LEVELS = LEVELS.length;
@@ -114,11 +125,13 @@ seedLocalhostMasterProgress();
 let progress = loadProgress();
 let route = { name: 'dashboard' };
 let activeSession = null;
+let activeEssentialSession = null;
 let activeAnswer = null;
 let activeAudio = null;
 let activeSpeech = null;
 let lastAutoPlayKey = null;
 let lastLearnAutoPlayKey = null;
+let lastEssentialAutoPlayKey = null;
 
 // Global Enter handler: while feedback is showing, Enter advances to the next
 // challenge. The answer input is disabled during feedback, so the form's own
@@ -129,6 +142,11 @@ document.addEventListener('keydown', (event) => {
   if (inQuiz && activeAnswer) {
     event.preventDefault();
     nextQuestion();
+  }
+  const inEssentialChallenge = route.name === 'essential-challenge' && activeEssentialSession && !activeEssentialSession.finished;
+  if (inEssentialChallenge && activeAnswer) {
+    event.preventDefault();
+    nextEssentialQuestion();
   }
 });
 
@@ -440,9 +458,21 @@ function renderHeader() {
       </button>
       <div class="header-actions">
         ${renderLocaleSwitcher()}
+        ${renderGitHubHeaderLink()}
         <div class="status-pill ${progress.finalExam.passed ? 'status-mastered' : ''}">${status}</div>
       </div>
     </header>
+  `;
+}
+
+function renderGitHubHeaderLink() {
+  return `
+    <a class="github-link" href="${GITHUB_REPO_URL}" target="_blank" rel="noopener" aria-label="View Count in French on GitHub">
+      <svg aria-hidden="true" viewBox="0 0 16 16" focusable="false">
+        <path d="M8 0C3.58 0 0 3.69 0 8.24c0 3.64 2.29 6.72 5.47 7.8.4.07.55-.18.55-.4 0-.2-.01-.85-.01-1.54-2.01.38-2.53-.5-2.69-.96-.09-.24-.48-.96-.82-1.16-.28-.16-.68-.55-.01-.56.63-.01 1.08.6 1.23.85.72 1.24 1.87.89 2.33.68.07-.54.28-.89.51-1.09-1.78-.21-3.64-.92-3.64-4.06 0-.9.31-1.64.82-2.21-.08-.21-.36-1.05.08-2.18 0 0 .67-.22 2.2.84A7.44 7.44 0 0 1 8 3.97c.68 0 1.36.09 1.99.28 1.53-1.07 2.2-.84 2.2-.84.44 1.13.16 1.97.08 2.18.51.57.82 1.31.82 2.21 0 3.15-1.87 3.85-3.65 4.06.29.26.54.75.54 1.51 0 1.09-.01 1.97-.01 2.24 0 .22.15.48.55.4A8.17 8.17 0 0 0 16 8.24C16 3.69 12.42 0 8 0Z" />
+      </svg>
+      <span>GitHub</span>
+    </a>
   `;
 }
 
@@ -479,6 +509,7 @@ function renderRoute() {
   if (route.name === 'quiz') return renderQuestionSession();
   if (route.name === 'review') return renderReviewScreen();
   if (route.name === 'exam') return renderQuestionSession();
+  if (route.name === 'essential-challenge') return renderEssentialChallenge();
   return renderDashboard();
 }
 
@@ -515,6 +546,7 @@ function renderDashboard() {
     </section>
     ${renderLevelGroups()}
     ${renderMissionsSection()}
+    ${renderEssentialsSection()}
   `;
 }
 
@@ -556,6 +588,302 @@ function renderMissionsSection() {
       </div>
     </section>
   `;
+}
+
+function renderEssentialsSection() {
+  return `
+    <section class="essentials-section" aria-labelledby="essentials-heading">
+      <div class="section-heading essentials-heading">
+        <p class="eyebrow">French essentials</p>
+        <h2 id="essentials-heading">Quick recall challenges.</h2>
+        <p>Practice verbs, prepositions, colors, days, and months with typed answers and Sound of Text pronunciation prompts.</p>
+      </div>
+      <div class="essential-challenge-grid">
+        ${ESSENTIAL_GROUPS.map(renderEssentialChallengeCard).join('')}
+      </div>
+    </section>
+  `;
+}
+
+function renderEssentialChallengeCard(group) {
+  const challengeSummary =
+    isCalendarSequenceGroup(group)
+      ? `${group.items.length * 3 + 1} questions · dictation + final order`
+      : `${group.items.length} questions · meaning + listening`;
+  return `
+    <article class="essential-challenge-card essential-challenge-${group.id}">
+      <div class="essential-challenge-preview" aria-hidden="true">
+        ${renderEssentialPreview(group)}
+      </div>
+      <div class="essential-challenge-copy">
+        <p class="eyebrow">${group.eyebrow}</p>
+        <h3>${group.title}</h3>
+        <p>${group.description}</p>
+        <span>${challengeSummary}</span>
+      </div>
+      <button class="primary-small essential-start" data-action="start-essential-challenge" data-group="${group.id}">
+        Start challenge
+      </button>
+    </article>
+  `;
+}
+
+function renderEssentialPreview(group) {
+  if (!group.illustration) {
+    return `<span class="calendar-preview">${group.items.slice(0, 3).map((item) => `<i>${item.display.slice(0, 3)}</i>`).join('')}</span>`;
+  }
+
+  return group.items
+    .slice(0, 3)
+    .map((item) => {
+      const colorStyle = item.color ? ` style="--swatch:${item.color}"` : '';
+      return `<span class="essential-illustration illustration-${group.id} illustration-${item.id}"${colorStyle}>${renderEssentialIllustration(group, item)}</span>`;
+    })
+    .join('');
+}
+
+function renderEssentialChallenge() {
+  if (!activeEssentialSession) return renderDashboard();
+  if (activeEssentialSession.finished) return renderEssentialResults();
+
+  const question = activeEssentialSession.questions[activeEssentialSession.index];
+  const item = question.item;
+  const group = activeEssentialSession.group;
+  const progressText = `${activeEssentialSession.index + 1} / ${activeEssentialSession.questions.length}`;
+  const completedCount = activeAnswer ? activeEssentialSession.index + 1 : activeEssentialSession.index;
+  const progressPercent = Math.round((completedCount / activeEssentialSession.questions.length) * 100);
+  const footerState = activeAnswer ? (activeAnswer.correct ? 'is-correct' : 'is-wrong') : '';
+  const answerKind = getEssentialAnswerKind(question);
+  const answerLabel = getEssentialAnswerLabel(group, answerKind);
+  const placeholder = getEssentialAnswerPlaceholder(group, answerKind);
+  const footerHint = getEssentialFooterHint(answerKind);
+
+  return `
+    <section class="essential-quiz ${footerState}">
+      <div class="quiz-topbar">
+        <button type="button" class="quiz-quit" data-action="dashboard" aria-label="Exit session">&times;</button>
+        <div class="session-progress" role="progressbar" aria-label="${group.title} challenge progress" aria-valuenow="${progressPercent}" aria-valuemin="0" aria-valuemax="100"><i style="width:${progressPercent}%"></i></div>
+        <span class="quiz-count">${progressText}</span>
+      </div>
+
+      <form class="essential-quiz-board" data-action="submit-answer">
+        <article class="essential-prompt-card">
+          <div class="card-tag">${group.title}</div>
+          ${renderEssentialPrompt(group, question)}
+          ${
+            item
+              ? `<button type="button" class="card-audio" data-action="play-essential-audio" data-vocab="${item.id}" aria-label="Play French audio">
+                  <span class="speaker" aria-hidden="true"></span>
+                  Hear it
+                </button>`
+              : ''
+          }
+        </article>
+
+        <div class="answer-zone">
+          <label class="answer-label" for="answer-input">
+            <span class="answer-kind-dot" aria-hidden="true"></span>
+            ${answerLabel}
+          </label>
+          ${renderEssentialAnswerInput(answerKind, placeholder)}
+        </div>
+
+        <footer class="quiz-footer">
+          ${activeAnswer ? renderEssentialFeedback(activeAnswer, question) : `<span class="footer-hint">${footerHint}</span>`}
+          ${
+            activeAnswer
+              ? '<button type="button" class="footer-action" data-action="next-essential-question">Continue</button>'
+              : '<button class="footer-action" type="submit">Check</button>'
+          }
+        </footer>
+      </form>
+    </section>
+  `;
+}
+
+function getEssentialAnswerLabel(group, answerKind) {
+  if (answerKind === 'english') return 'Type the English meaning';
+  if (answerKind === 'sequence') return `Type the ${getEssentialSequenceNoun(group)} in order`;
+  return 'Type the French word';
+}
+
+function getEssentialAnswerPlaceholder(group, answerKind) {
+  if (answerKind === 'english') return `e.g. ${group.items[0].english}`;
+  if (answerKind === 'sequence') return 'one French word per line';
+  return `e.g. ${group.items[0].display}`;
+}
+
+function getEssentialFooterHint(answerKind) {
+  if (answerKind === 'sequence') return 'One item per line - click Check when done';
+  return 'Press Enter to submit';
+}
+
+function getEssentialSequenceNoun(group) {
+  return group.id === 'months' ? 'months' : 'days';
+}
+
+function getEssentialSequenceRange(group) {
+  return group.id === 'months' ? 'January to December' : 'Monday to Sunday';
+}
+
+function renderEssentialAnswerInput(answerKind, placeholder) {
+  if (answerKind === 'sequence') {
+    return `<textarea id="answer-input" class="sequence-answer" name="answer" data-expected-kind="french" rows="7" placeholder="${placeholder}" autocomplete="off" autocapitalize="off" spellcheck="false" ${activeAnswer ? 'disabled' : ''} autofocus></textarea>`;
+  }
+
+  return `<input id="answer-input" name="answer" type="text" data-expected-kind="french" placeholder="${placeholder}" autocomplete="off" autocapitalize="off" spellcheck="false" ${activeAnswer ? 'disabled' : ''} autofocus />`;
+}
+
+function renderEssentialPrompt(group, question) {
+  const item = question.item;
+  if (question.mode === 'sequence') {
+    return `
+      <div class="essential-meaning-prompt essential-sequence-prompt">
+        <span>Final order check</span>
+        <strong>Final Sequence</strong>
+        <em>${getEssentialSequenceRange(group)}</em>
+        <ol class="seed-lines" aria-label="${group.items.length} blank lines for the French ${getEssentialSequenceNoun(group)}">
+          ${group.items.map(() => '<li><span></span></li>').join('')}
+        </ol>
+      </div>
+    `;
+  }
+
+  if (question.mode === 'listening' || question.mode === 'dictation') {
+    const hint = question.mode === 'dictation' ? 'Autoplay dictation' : 'Listen and type it';
+    return `
+      <button type="button" class="audio-prompt essential-audio-prompt" data-action="play-essential-audio" data-vocab="${item.id}" aria-label="Play French audio">
+        <span class="audio-wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+        <span class="audio-hint">${hint}</span>
+      </button>
+    `;
+  }
+
+  if (question.mode === 'translate') {
+    return `
+      <div class="essential-meaning-prompt essential-translation-prompt">
+        <span>Listen, read, then translate</span>
+        <strong>${item.display}</strong>
+        ${renderHighlightedExample(item)}
+      </div>
+    `;
+  }
+
+  return `
+    <div class="essential-meaning-prompt">
+      ${
+        group.illustration
+          ? `<span class="essential-illustration illustration-${group.id} illustration-${item.id}"${item.color ? ` style="--swatch:${item.color}"` : ''} aria-hidden="true">${renderEssentialIllustration(group, item)}</span>`
+          : ''
+      }
+      <span>What is the French for</span>
+      <strong>${item.english}</strong>
+      ${renderHighlightedExample(item)}
+      ${renderConjugationSupport(item)}
+    </div>
+  `;
+}
+
+function renderHighlightedExample(item) {
+  if (!item.example) return '';
+
+  const example = escapeHtml(item.example);
+  const highlight = item.highlight ? escapeHtml(item.highlight) : '';
+  if (!highlight) return `<em class="essential-example">${example}</em>`;
+
+  const index = example.toLocaleLowerCase().indexOf(highlight.toLocaleLowerCase());
+  if (index === -1) return `<em class="essential-example">${example}</em>`;
+
+  return `
+    <em class="essential-example">
+      ${example.slice(0, index)}<mark>${example.slice(index, index + highlight.length)}</mark>${example.slice(index + highlight.length)}
+    </em>
+  `;
+}
+
+function renderConjugationSupport(item) {
+  if (!item.conjugation) return '';
+
+  const forms = [
+    ['je', item.conjugation.je],
+    ['tu', item.conjugation.tu],
+    ['il', item.conjugation.il],
+    ['nous', item.conjugation.nous],
+    ['vous', item.conjugation.vous],
+    ['ils', item.conjugation.ils],
+  ];
+
+  return `
+    <dl class="conjugation-grid" aria-label="${item.display} present indicative conjugation">
+      ${forms.map(([pronoun, form]) => `<div><dt>${pronoun}</dt><dd>${form}</dd></div>`).join('')}
+    </dl>
+  `;
+}
+
+function renderEssentialFeedback(answer, question) {
+  if (answer.expectedKind === 'sequence') {
+    return `
+      <div class="feedback ${answer.correct ? 'is-correct' : 'is-wrong'}" role="status">
+        <span class="feedback-icon" aria-hidden="true">${answer.correct ? '&check;' : '&times;'}</span>
+        <span class="feedback-body">
+          <strong>${answer.correct ? 'Order locked' : 'Correct order'}</strong>
+          <span>${question.items.map((item) => item.display).join(' - ')}</span>
+        </span>
+      </div>
+    `;
+  }
+
+  const item = question.item;
+  const expected = answer.expectedKind === 'english' ? item.english : item.display;
+  const paired = answer.expectedKind === 'english' ? item.display : item.english;
+  const example = item.example ? renderHighlightedExample(item) : '';
+  return `
+    <div class="feedback ${answer.correct ? 'is-correct' : 'is-wrong'}" role="status">
+      <span class="feedback-icon" aria-hidden="true">${answer.correct ? '&check;' : '&times;'}</span>
+      <span class="feedback-body">
+        <strong>${answer.correct ? 'Correct' : 'Correct answer'}</strong>
+        <span>${expected} · ${paired}</span>
+        ${example}
+      </span>
+    </div>
+  `;
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function renderEssentialResults() {
+  const score = Math.round((activeEssentialSession.correct / activeEssentialSession.answered) * 100) || 0;
+  return `
+    <section class="results-panel">
+      <p class="eyebrow">${activeEssentialSession.group.title}</p>
+      <h1>${score === 100 ? 'Challenge cleared' : 'Challenge complete'}</h1>
+      <div class="score-orb"><strong>${score}%</strong><span>${activeEssentialSession.correct}/${activeEssentialSession.answered}</span></div>
+      <p>${score === 100 ? 'Perfect recall for this set.' : 'Replay the challenge to lock in the misses.'}</p>
+      <div class="result-actions">
+        <button class="primary-action compact" data-action="restart-essential-challenge" data-group="${activeEssentialSession.group.id}">Replay challenge</button>
+        <button class="secondary-action" data-action="dashboard">Dashboard</button>
+      </div>
+    </section>
+  `;
+}
+
+function renderEssentialIllustration(group, item) {
+  if (group.id === 'colors') {
+    return '<span class="color-drop"></span><span class="color-chip"></span>';
+  }
+
+  if (group.id === 'prepositions') {
+    return '<span class="prep-box"></span><span class="prep-dot"></span>';
+  }
+
+  return '<span class="verb-path"></span><span class="verb-dot"></span><span class="verb-line"></span>';
 }
 
 function renderReviewModeButtons() {
@@ -996,10 +1324,18 @@ function bindActions() {
       event.preventDefault();
       // When feedback is showing, the form's primary action is Continue.
       if (activeAnswer) {
-        nextQuestion();
+        if (route.name === 'essential-challenge') {
+          nextEssentialQuestion();
+        } else {
+          nextQuestion();
+        }
         return;
       }
-      submitAnswer(new FormData(form).get('answer'));
+      if (route.name === 'essential-challenge') {
+        submitEssentialAnswer(new FormData(form).get('answer'));
+      } else {
+        submitAnswer(new FormData(form).get('answer'));
+      }
     });
   }
 
@@ -1011,6 +1347,7 @@ function bindActions() {
   focusAnswerInput();
   maybeAutoPlay();
   maybeAutoPlayLearnCard();
+  maybeAutoPlayEssential();
 }
 
 // Allowed characters per expected answer kind:
@@ -1084,6 +1421,27 @@ function maybeAutoPlayLearnCard() {
   speak(card);
 }
 
+function maybeAutoPlayEssential() {
+  if (route.name !== 'essential-challenge') {
+    lastEssentialAutoPlayKey = null;
+    return;
+  }
+
+  if (!activeEssentialSession || activeEssentialSession.finished || activeAnswer) {
+    if (activeAnswer) lastEssentialAutoPlayKey = null;
+    return;
+  }
+
+  const question = activeEssentialSession.questions[activeEssentialSession.index];
+  if (!question || !shouldAutoPlayEssentialQuestion(question)) return;
+
+  const key = `${activeEssentialSession.group.id}-${activeEssentialSession.index}-${question.item.id}`;
+  if (key === lastEssentialAutoPlayKey) return;
+  lastEssentialAutoPlayKey = key;
+
+  speakEssential(question.item);
+}
+
 function focusAnswerInput() {
   if (activeAnswer) return;
   // Defer to the next frame so the freshly rendered input is laid out and
@@ -1104,9 +1462,13 @@ function handleAction(event) {
   if (action === 'continue-level') continueLevel(Number(target.dataset.level));
   if (action === 'start-level-master') startLevelDimensionMastery(Number(target.dataset.level));
   if (action === 'start-mission') startMission(target.dataset.mission, target.dataset.phase);
+  if (action === 'start-essential-challenge') startEssentialChallenge(target.dataset.group);
+  if (action === 'restart-essential-challenge') startEssentialChallenge(target.dataset.group);
   if (action === 'next-learn') nextLearn(Number(target.dataset.level), Number(target.dataset.index));
   if (action === 'play-audio') playCardAudio(Number(target.dataset.number));
+  if (action === 'play-essential-audio') playEssentialAudio(target.dataset.vocab);
   if (action === 'next-question') nextQuestion();
+  if (action === 'next-essential-question') nextEssentialQuestion();
   if (action === 'start-review') startReview(target.dataset.mode);
   if (action === 'start-exam') startExam();
   if (action === 'finish-session') finishSession();
@@ -1114,8 +1476,10 @@ function handleAction(event) {
 
 function goDashboard() {
   activeSession = null;
+  activeEssentialSession = null;
   activeAnswer = null;
   lastAutoPlayKey = null;
+  lastEssentialAutoPlayKey = null;
   stopAudio();
   route = { name: 'dashboard' };
   render();
@@ -1158,6 +1522,7 @@ function nextLearn(levelId, index) {
 }
 
 function startLevelMastery(levelId) {
+  activeEssentialSession = null;
   activeSession = {
     kind: 'mastery',
     title: `Level ${levelId} Mastery Review`,
@@ -1200,6 +1565,7 @@ function startLevelReview(levelId) {
 
 function startLevelDimensionMastery(levelId, dimension = nextLevelMasteryDimension(levelId)) {
   if (!progress.levels[levelId].completed) return;
+  activeEssentialSession = null;
   activeSession = {
     kind: 'dimension-master',
     title: `Level ${levelId} ${dimensionLabel(dimension)} Mastery`,
@@ -1233,6 +1599,7 @@ function startMission(missionId, phaseId) {
   const phase = MISSION_PHASES.find((item) => item.id === (phaseId || nextMissionPhaseId(missionId)));
   if (!phase) return;
 
+  activeEssentialSession = null;
   activeSession = {
     kind: 'mission',
     title: `${mission.title} ${phase.label}`,
@@ -1257,6 +1624,62 @@ function buildMissionQuestions(mission, phase) {
     .map((card) => ({ card, type }));
 }
 
+function startEssentialChallenge(groupId) {
+  const group = ESSENTIAL_GROUPS.find((item) => item.id === groupId);
+  if (!group) return;
+
+  activeSession = null;
+  activeEssentialSession = {
+    group,
+    questions: buildEssentialQuestions(group),
+    index: 0,
+    answered: 0,
+    correct: 0,
+    finished: false,
+  };
+  activeAnswer = null;
+  lastEssentialAutoPlayKey = null;
+  route = { name: 'essential-challenge', groupId: group.id };
+  render();
+}
+
+function buildEssentialQuestions(group) {
+  const questions = buildEssentialChallengeQuestions(group);
+  if (!isCalendarSequenceGroup(group)) return shuffle(questions);
+
+  const sequenceQuestion = questions.find((question) => question.mode === 'sequence');
+  return [
+    ...shuffle(questions.filter((question) => question.mode !== 'sequence')),
+    sequenceQuestion,
+  ].filter(Boolean);
+}
+
+function submitEssentialAnswer(value) {
+  if (!activeEssentialSession || activeAnswer) return;
+  const question = activeEssentialSession.questions[activeEssentialSession.index];
+  const expectedKind = getEssentialAnswerKind(question);
+  const answerTarget = expectedKind === 'sequence' ? question.items : question.item;
+  const correct = validateEssentialAnswer(value, answerTarget, expectedKind);
+  activeEssentialSession.answered += 1;
+  if (correct) activeEssentialSession.correct += 1;
+  activeAnswer = { correct, expectedKind };
+  render();
+  if (question.item && (correct || expectedKind === 'english')) speakEssential(question.item);
+}
+
+function nextEssentialQuestion() {
+  if (!activeEssentialSession) return;
+  activeAnswer = null;
+
+  if (activeEssentialSession.index < activeEssentialSession.questions.length - 1) {
+    activeEssentialSession.index += 1;
+  } else {
+    activeEssentialSession.finished = true;
+  }
+
+  render();
+}
+
 function getMissionNumbers(mission) {
   if (Array.isArray(mission.numbers)) return mission.numbers;
 
@@ -1276,6 +1699,7 @@ function startReview(mode) {
   const reviewMode = getReviewMode(mode);
   const questions = buildReviewQuestions(cards, reviewMode.id);
   if (questions.length === 0) return;
+  activeEssentialSession = null;
   activeSession = {
     kind: 'review',
     title: reviewMode.title,
@@ -1318,6 +1742,7 @@ function getReviewMode(mode) {
 
 function startExam() {
   if (!allLevelsComplete()) return;
+  activeEssentialSession = null;
   activeSession = {
     kind: 'exam',
     title: 'Final Exam',
@@ -1602,6 +2027,50 @@ function stopAudio() {
 
 function playCardAudio(number) {
   speak(getCard(number));
+}
+
+function playEssentialAudio(id) {
+  const item = ESSENTIAL_ITEMS.find((candidate) => candidate.id === id);
+  if (!item) return;
+  speakEssential(item);
+}
+
+function speakEssential(item) {
+  stopAudio();
+  const audio = new Audio(new URL(`${item.id}.mp3`, ESSENTIAL_AUDIO_BASE_URL).href);
+  audio.preload = 'auto';
+  activeAudio = audio;
+  audio.addEventListener('ended', () => {
+    if (activeAudio === audio) activeAudio = null;
+  });
+  audio.addEventListener(
+    'error',
+    () => {
+      if (activeAudio === audio) activeAudio = null;
+      speakEssentialFallback(item);
+    },
+    { once: true },
+  );
+  audio.play().catch(() => {
+    if (activeAudio === audio) activeAudio = null;
+    speakEssentialFallback(item);
+  });
+}
+
+function speakEssentialFallback(item) {
+  if (!('speechSynthesis' in window) || typeof SpeechSynthesisUtterance === 'undefined') return;
+
+  const utterance = new SpeechSynthesisUtterance(item.french);
+  utterance.lang = 'fr-FR';
+  utterance.rate = 0.85;
+  activeSpeech = utterance;
+  utterance.addEventListener('end', () => {
+    if (activeSpeech === utterance) activeSpeech = null;
+  });
+  utterance.addEventListener('error', () => {
+    if (activeSpeech === utterance) activeSpeech = null;
+  });
+  window.speechSynthesis.speak(utterance);
 }
 
 function shuffle(items) {
