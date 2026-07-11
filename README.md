@@ -4,7 +4,7 @@ Learn Standard French numbers from 1 through billions, then build recognition fo
 
 Open the app: https://icey-max.github.io/count-in-french/
 
-![Count in French demo: dashboard, essentials cards, highlighted verb example, and answer feedback](assets/readme/count-in-french-demo.gif)
+![Count in French demo: dashboard, Level 1 number cards from un to dix, and a guided spelling check](assets/readme/count-in-french-demo.gif)
 
 ## What This Helps You Learn
 
