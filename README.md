@@ -6,8 +6,6 @@ Open the app: https://icey-max.github.io/count-in-french/
 
 ![Count in French demo: dashboard, essentials cards, highlighted verb example, and answer feedback](assets/readme/count-in-french-demo.gif)
 
-![French Numbers Mastery demo: dashboard, lesson cards, and a typed answer](assets/readme/french-numbers-mastery-demo.gif)
-
 ## What This Helps You Learn
 
 Count in French is for beginners who want Standard French numbers and everyday starter vocabulary to feel automatic. It trains you to recognize numbers by sight, write them in Standard French, understand them when you hear them, and remember the patterns behind the difficult ranges.
